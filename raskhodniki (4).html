@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Расходники — Айда Чай Пить</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1EEE3;
+    --surface:#FFFFFF;
+    --surface-muted:#EAE5D5;
+    --text:#2A2A22;
+    --text-muted:#7A7566;
+    --accent:#435A3C;
+    --accent-dark:#324429;
+    --low:#B8842E;
+    --low-bg:#FBF0DC;
+    --out:#9C3B2C;
+    --out-bg:#F8E4DE;
+    --border:#DCD6C2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    min-height:100vh;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    padding-bottom:96px;
+  }
+  header{
+    padding:22px 18px 14px;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    z-index:5;
+    border-bottom:1px solid var(--border);
+  }
+  .header-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:22px;
+    line-height:1.15;
+    margin:0 0 3px;
+  }
+  .subtitle{
+    font-size:13px;
+    color:var(--text-muted);
+    margin:0;
+  }
+  .edit-toggle{
+    flex:0 0 auto;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    color:var(--text-muted);
+    font-size:16px;
+  }
+  .edit-toggle.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .summary{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    flex-wrap:wrap;
+  }
+  .pill{
+    font-size:12.5px;
+    padding:5px 11px;
+    border-radius:100px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text-muted);
+  }
+  .pill.low{background:var(--low-bg);color:var(--low);border-color:transparent;}
+  .pill.out{background:var(--out-bg);color:var(--out);border-color:transparent;}
+
+  main{padding:6px 14px 0;flex:1;}
+  .category{margin-top:22px;}
+  .category-label{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:14.5px;
+    color:var(--accent-dark);
+    margin:0 4px 8px;
+  }
+  .items{
+    background:var(--surface);
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    overflow:hidden;
+  }
+  .item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 14px;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+    user-select:none;
+    transition:background .15s ease;
+  }
+  .item:last-child{border-bottom:none;}
+  .item[data-state="low"]{background:var(--low-bg);}
+  .item[data-state="out"]{background:var(--out-bg);}
+  .item-name{
+    font-size:15px;
+    line-height:1.35;
+    flex:1;
+    padding-right:10px;
+  }
+  .item[data-state="low"] .item-name,
+  .item[data-state="out"] .item-name{font-weight:600;}
+  .state-chip{
+    font-size:12px;
+    color:var(--text-muted);
+    flex:0 0 auto;
+    min-width:30px;
+    text-align:right;
+  }
+  .item[data-state="low"] .state-chip{color:var(--low);}
+  .item[data-state="out"] .state-chip{color:var(--out);}
+  .item-delete{
+    margin-left:10px;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:none;
+    background:var(--out-bg);
+    color:var(--out);
+    font-size:14px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .add-row{
+    display:flex;
+    gap:8px;
+    padding:10px 14px;
+    background:var(--surface-muted);
+  }
+  .add-row input{
+    flex:1;
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:8px 10px;
+    font-size:14px;
+    font-family:inherit;
+    background:var(--surface);
+    color:var(--text);
+  }
+  .add-row button{
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    border-radius:9px;
+    padding:0 14px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .add-category{
+    margin-top:18px;
+    width:100%;
+    padding:12px;
+    border-radius:var(--radius);
+    border:1px dashed var(--border);
+    background:transparent;
+    color:var(--text-muted);
+    font-family:inherit;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .restore-defaults{
+    display:block;
+    margin:22px auto 4px;
+    background:none;
+    border:none;
+    color:var(--out);
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  .actionbar{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    display:flex;
+    justify-content:center;
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, var(--bg) 60%, transparent);
+  }
+  .actionbar-inner{
+    max-width:480px;
+    width:100%;
+    display:flex;
+    gap:10px;
+  }
+  .btn{
+    flex:1;
+    padding:13px;
+    border-radius:12px;
+    border:none;
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-secondary{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    flex:0 0 auto;
+    padding:13px 16px;
+  }
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+  }
+  .btn-primary:disabled{
+    background:var(--surface-muted);
+    color:var(--text-muted);
+    cursor:default;
+  }
+  .btn:focus-visible, .edit-toggle:focus-visible, .item:focus-visible{
+    outline:2px solid var(--accent-dark);
+    outline-offset:2px;
+  }
+
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(30,28,20,.4);
+    display:flex;
+    align-items:flex-end;
+    z-index:20;
+  }
+  .sheet{
+    background:var(--surface);
+    width:100%;
+    max-width:480px;
+    margin:0 auto;
+    border-radius:20px 20px 0 0;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+  }
+  .sheet h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:18px;
+    margin:0 0 12px;
+  }
+  .sheet textarea{
+    width:100%;
+    min-height:160px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    font-family:inherit;
+    font-size:14px;
+    color:var(--text);
+    background:var(--surface-muted);
+    resize:vertical;
+    margin-bottom:14px;
+  }
+  .sheet-actions{display:flex;flex-direction:column;gap:9px;}
+  .sheet-actions a, .sheet-actions button{text-decoration:none;text-align:center;}
+  .copied-note{
+    font-size:12.5px;
+    color:var(--accent-dark);
+    text-align:center;
+    margin:8px 0 0;
+    min-height:16px;
+  }
+  .copied-note.send-error{
+    color:var(--out);
+  }
+  .loading, .empty{
+    text-align:center;
+    color:var(--text-muted);
+    font-size:14px;
+    padding:60px 20px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading" id="loading">Загружаем список…</div>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'raskhodniki-data-v1';
+
+  var TELEGRAM_BOT_TOKEN = '8920248174:AAH6I-SN2iIVC7UFDGJdi11HjHfh9sjDznU';
+  var TELEGRAM_CHAT_ID = '-1002628442313';
+  var TELEGRAM_THREAD_ID = 7;
+
+  var DEFAULT_DATA = {
+    categories: [
+      { id:'c1', name:'Уборка и гигиена', items:[
+        {id:'i1', name:'Тряпки для чабаней', state:'ok'},
+        {id:'i2', name:'Губки для мытья посуды', state:'ok'},
+        {id:'i3', name:'Мусорные мешки', state:'ok'},
+        {id:'i4', name:'Бумажные полотенца', state:'ok'},
+        {id:'i5', name:'Туалетная бумага', state:'ok'}
+      ]},
+      { id:'c2', name:'Печать и касса', items:[
+        {id:'i6', name:'Наклейки для принтера (70x50)', state:'ok'},
+        {id:'i7', name:'Чеки для терминала', state:'ok'},
+        {id:'i8', name:'Чеки для кассы', state:'ok'},
+        {id:'i9', name:'Риббон', state:'ok'}
+      ]},
+      { id:'c3', name:'Упаковка', items:[
+        {id:'i10', name:'Конверты для блинов прозрачные (35х20)', state:'ok'},
+        {id:'i11', name:'Конверты для блинов', state:'ok'},
+        {id:'i12', name:'Пакеты для банок (29.5х20)', state:'ok'},
+        {id:'i13', name:'Крафтовые пакеты маленькие с ручками (21,5х24,5)', state:'ok'},
+        {id:'i14', name:'Крафтовые пакеты большие с ручками', state:'ok'},
+        {id:'i15', name:'Крафтовые пакеты маленькие', state:'ok'},
+        {id:'i16', name:'Зип пакеты', state:'ok'},
+        {id:'i17', name:'Зип пакет чёрный (12x8)', state:'ok'},
+        {id:'i18', name:'Зип пакет белый (12x8)', state:'ok'}
+      ]},
+      { id:'c4', name:'Посуда и подача', items:[
+        {id:'i19', name:'Капхолдеры', state:'ok'},
+        {id:'i20', name:'Сито для стаканов', state:'ok'},
+        {id:'i21', name:'Стаканы (для трав)', state:'ok'},
+        {id:'i22', name:'Стаканы (чай с собой)', state:'ok'},
+        {id:'i23', name:'Крышки (чай с собой)', state:'ok'}
+      ]},
+      { id:'c5', name:'Прочее', items:[
+        {id:'i24', name:'Лампочки', state:'ok'}
+      ]}
+    ]
+  };
+
+  var STATE_ORDER = ['ok','low','out'];
+  var STATE_LABEL = { ok:'', low:'мало', out:'нет' };
+
+  var data = null;
+  var editMode = false;
+
+  function uid(prefix){
+    return prefix + Math.random().toString(36).slice(2,9);
+  }
+
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+  async function loadData(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        data = JSON.parse(raw);
+        return;
+      }
+    }catch(e){
+      // storage unavailable or empty — fall through to defaults
+    }
+    data = clone(DEFAULT_DATA);
+    await saveData();
+  }
+
+  async function saveData(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }catch(e){
+      console.error('Не удалось сохранить список', e);
+    }
+  }
+
+  function cycleState(current){
+    var idx = STATE_ORDER.indexOf(current);
+    return STATE_ORDER[(idx+1) % STATE_ORDER.length];
+  }
+
+  function todayStr(){
+    var d = new Date();
+    var dd = String(d.getDate()).padStart(2,'0');
+    var mm = String(d.getMonth()+1).padStart(2,'0');
+    return dd+'.'+mm+'.'+d.getFullYear();
+  }
+
+  function buildMessage(){
+    var out=[], low=[];
+    data.categories.forEach(function(cat){
+      cat.items.forEach(function(it){
+        if(it.state==='out') out.push(it.name);
+        else if(it.state==='low') low.push(it.name);
+      });
+    });
+    if(!out.length && !low.length) return null;
+    var lines = ['Расходники на закупку ('+todayStr()+'):',''];
+    if(out.length){
+      lines.push('Закончилось:');
+      out.forEach(function(n){ lines.push('- '+n); });
+      lines.push('');
+    }
+    if(low.length){
+      lines.push('Мало, есть остаток:');
+      low.forEach(function(n){ lines.push('- '+n); });
+    }
+    return lines.join('\n').trim();
+  }
+
+  function resetAllStates(){
+    data.categories.forEach(function(cat){
+      cat.items.forEach(function(it){ it.state = 'ok'; });
+    });
+    saveData();
+  }
+
+  function counts(){
+    var low=0, out=0;
+    data.categories.forEach(function(cat){
+      cat.items.forEach(function(it){
+        if(it.state==='low') low++;
+        if(it.state==='out') out++;
+      });
+    });
+    return {low:low, out:out};
+  }
+
+  function render(){
+    var app = document.getElementById('app');
+    var c = counts();
+    var msg = buildMessage();
+
+    var html = '';
+    html += '<header>';
+    html +=   '<div class="header-row">';
+    html +=     '<div><h1>Расходники</h1><p class="subtitle">«Айда Чай Пить» · еженедельная проверка</p></div>';
+    html +=     '<button class="edit-toggle'+(editMode?' active':'')+'" id="editToggle" aria-label="Редактировать список">'+(editMode?'✓':'✎')+'</button>';
+    html +=   '</div>';
+    html +=   '<div class="summary">';
+    html +=     (c.out || c.low) ?
+                  (c.out? '<span class="pill out">закончилось: '+c.out+'</span>' : '') +
+                  (c.low? '<span class="pill low">мало: '+c.low+'</span>' : '')
+                  : '<span class="pill">пока всё в порядке</span>';
+    html +=   '</div>';
+    html += '</header>';
+
+    html += '<main>';
+    data.categories.forEach(function(cat){
+      html += '<div class="category" data-cat="'+cat.id+'">';
+      html +=   '<p class="category-label">'+cat.name+'</p>';
+      html +=   '<div class="items">';
+      cat.items.forEach(function(it){
+        html += '<div class="item" tabindex="0" data-cat="'+cat.id+'" data-item="'+it.id+'" data-state="'+it.state+'">';
+        if(editMode){
+          html += '<span class="item-name" data-editable="1">'+escapeHtml(it.name)+'</span>';
+          html += '<button class="item-delete" data-del-cat="'+cat.id+'" data-del-item="'+it.id+'" aria-label="Удалить">×</button>';
+        }else{
+          html += '<span class="item-name">'+escapeHtml(it.name)+'</span>';
+          html += '<span class="state-chip">'+STATE_LABEL[it.state]+'</span>';
+        }
+        html += '</div>';
+      });
+      html +=   '</div>';
+      if(editMode){
+        html += '<div class="add-row">';
+        html +=   '<input type="text" placeholder="Новая позиция…" data-add-input="'+cat.id+'">';
+        html +=   '<button data-add-btn="'+cat.id+'">Добавить</button>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    if(editMode){
+      html += '<button class="add-category" id="addCategory">+ Добавить категорию</button>';
+      html += '<button class="restore-defaults" id="restoreDefaults">Восстановить список по умолчанию</button>';
+    }
+    html += '</main>';
+
+    html += '<div class="actionbar"><div class="actionbar-inner">';
+    html +=   '<button class="btn btn-secondary" id="resetBtn">Сбросить</button>';
+    html +=   '<button class="btn btn-primary" id="sendBtn" '+(msg?'':'disabled')+'>Отправить список</button>';
+    html += '</div></div>';
+
+    app.innerHTML = html;
+    attachHandlers();
+  }
+
+  function escapeHtml(s){
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function attachHandlers(){
+    document.getElementById('editToggle').addEventListener('click', function(){
+      editMode = !editMode;
+      render();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', function(){
+      resetAllStates();
+      render();
+    });
+
+    var sendBtn = document.getElementById('sendBtn');
+    if(sendBtn){
+      sendBtn.addEventListener('click', openSendSheet);
+    }
+
+    document.querySelectorAll('.item').forEach(function(row){
+      row.addEventListener('click', function(e){
+        if(editMode) return; // in edit mode, tap doesn't cycle state
+        var catId = row.getAttribute('data-cat');
+        var itemId = row.getAttribute('data-item');
+        var cat = data.categories.find(function(c){return c.id===catId;});
+        var item = cat.items.find(function(i){return i.id===itemId;});
+        item.state = cycleState(item.state);
+        saveData();
+        render();
+      });
+      row.addEventListener('keydown', function(e){
+        if(!editMode && (e.key==='Enter' || e.key===' ')){
+          e.preventDefault();
+          row.click();
+        }
+      });
+    });
+
+    document.querySelectorAll('.item-name[data-editable]').forEach(function(nameEl){
+      nameEl.addEventListener('click', function(e){
+        e.stopPropagation();
+        var row = nameEl.closest('.item');
+        var catId = row.getAttribute('data-cat');
+        var itemId = row.getAttribute('data-item');
+        var cat = data.categories.find(function(c){return c.id===catId;});
+        var item = cat.items.find(function(i){return i.id===itemId;});
+        var next = prompt('Название позиции:', item.name);
+        if(next && next.trim()){
+          item.name = next.trim();
+          saveData();
+          render();
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-del-item]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var catId = btn.getAttribute('data-del-cat');
+        var itemId = btn.getAttribute('data-del-item');
+        var cat = data.categories.find(function(c){return c.id===catId;});
+        cat.items = cat.items.filter(function(i){return i.id!==itemId;});
+        saveData();
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-add-btn]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var catId = btn.getAttribute('data-add-btn');
+        var input = document.querySelector('[data-add-input="'+catId+'"]');
+        var val = input.value.trim();
+        if(!val) return;
+        var cat = data.categories.find(function(c){return c.id===catId;});
+        cat.items.push({id:uid('i'), name:val, state:'ok'});
+        saveData();
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-add-input]').forEach(function(input){
+      input.addEventListener('keydown', function(e){
+        if(e.key==='Enter'){
+          e.preventDefault();
+          document.querySelector('[data-add-btn="'+input.getAttribute('data-add-input')+'"]').click();
+        }
+      });
+    });
+
+    var addCatBtn = document.getElementById('addCategory');
+    if(addCatBtn){
+      addCatBtn.addEventListener('click', function(){
+        var name = prompt('Название категории:');
+        if(name && name.trim()){
+          data.categories.push({id:uid('c'), name:name.trim(), items:[]});
+          saveData();
+          render();
+        }
+      });
+    }
+
+    var restoreBtn = document.getElementById('restoreDefaults');
+    if(restoreBtn){
+      restoreBtn.addEventListener('click', function(){
+        if(confirm('Заменить текущий список списком по умолчанию? Текущие позиции и отметки будут потеряны.')){
+          data = clone(DEFAULT_DATA);
+          saveData();
+          render();
+        }
+      });
+    }
+  }
+
+  async function sendToTelegram(text){
+    var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
+    var res = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, message_thread_id: TELEGRAM_THREAD_ID, text: text })
+    });
+    var payload = await res.json();
+    if(!payload.ok){
+      throw new Error(payload.description || 'Telegram вернул ошибку');
+    }
+    return payload;
+  }
+
+  function openSendSheet(){
+    var msg = buildMessage();
+    if(!msg) return;
+    var overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.id = 'overlay';
+    overlay.innerHTML =
+      '<div class="sheet">' +
+        '<h2>Список на закупку</h2>' +
+        '<textarea id="msgArea" readonly>'+escapeHtml(msg)+'</textarea>' +
+        '<div class="sheet-actions">' +
+          '<button class="btn btn-primary" id="sendTgBtn">Отправить в группу</button>' +
+          '<button class="btn btn-secondary" id="copyBtn">Скопировать текст</button>' +
+          '<button class="btn btn-secondary" id="closeSheet">Закрыть</button>' +
+        '</div>' +
+        '<p class="copied-note" id="statusNote"></p>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function(e){
+      if(e.target === overlay) document.body.removeChild(overlay);
+    });
+    document.getElementById('closeSheet').addEventListener('click', function(){
+      document.body.removeChild(overlay);
+    });
+
+    document.getElementById('sendTgBtn').addEventListener('click', async function(){
+      var btn = this;
+      var note = document.getElementById('statusNote');
+      note.classList.remove('send-error');
+      btn.disabled = true;
+      btn.textContent = 'Отправляем…';
+      try{
+        await sendToTelegram(msg);
+        note.textContent = 'Отправлено в группу ✓';
+        resetAllStates();
+        setTimeout(function(){
+          if(document.body.contains(overlay)) document.body.removeChild(overlay);
+          render();
+        }, 900);
+      }catch(err){
+        btn.disabled = false;
+        btn.textContent = 'Отправить в группу';
+        note.classList.add('send-error');
+        note.textContent = 'Не получилось отправить: ' + err.message + '. Можно скопировать текст и отправить вручную.';
+      }
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async function(){
+      var note = document.getElementById('statusNote');
+      note.classList.remove('send-error');
+      try{
+        await navigator.clipboard.writeText(msg);
+        note.textContent = 'Скопировано ✓';
+      }catch(e){
+        var area = document.getElementById('msgArea');
+        area.removeAttribute('readonly');
+        area.focus();
+        area.select();
+        try{
+          document.execCommand('copy');
+          note.textContent = 'Скопировано ✓';
+        }catch(e2){
+          note.textContent = 'Не удалось скопировать — выделите текст вручную';
+        }
+        area.setAttribute('readonly','');
+      }
+    });
+  }
+
+  async function init(){
+    await loadData();
+    render();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
