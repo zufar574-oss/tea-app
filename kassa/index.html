@@ -6,33 +6,77 @@
 <title>Касса</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500&family=Mulish:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
-  --bg: #f5f3ef;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface2: #f0ede8;
-  --border: rgba(0,0,0,0.07);
-  --border2: rgba(0,0,0,0.11);
-  --text: #1a1916;
-  --muted: #6b6860;
-  --hint: #aaa89f;
-  --accent: #8b6f47;
-  --accent-light: #c4a97d;
-  --accent-dim: rgba(139,111,71,0.08);
-  --green: #3a7d52;
-  --green-bg: rgba(58,125,82,0.08);
-  --red: #b84040;
-  --red-bg: rgba(184,64,64,0.08);
+  --surface2: #f0f0f0;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111111;
+  --muted: #6e6e6e;
+  --hint: #9a9a9a;
+  --accent: #111111;
+  --accent-contrast: #ffffff;
+  --accent-light: #444444;
+  --accent-dim: rgba(0,0,0,0.06);
   --radius: 16px;
   --radius-sm: 10px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #262626;
+    --border: rgba(255,255,255,0.09);
+    --border2: rgba(255,255,255,0.16);
+    --text: #f2f2f2;
+    --muted: #9a9a9a;
+    --hint: #7a7a7a;
+    --accent: #f2f2f2;
+    --accent-contrast: #0f0f0f;
+    --accent-light: #bbbbbb;
+    --accent-dim: rgba(255,255,255,0.08);
+  }
+}
+
+html[data-theme="light"]{
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0f0f0;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111111;
+  --muted: #6e6e6e;
+  --hint: #9a9a9a;
+  --accent: #111111;
+  --accent-contrast: #ffffff;
+  --accent-light: #444444;
+  --accent-dim: rgba(0,0,0,0.06);
+}
+
+html[data-theme="dark"]{
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #262626;
+  --border: rgba(255,255,255,0.09);
+  --border2: rgba(255,255,255,0.16);
+  --text: #f2f2f2;
+  --muted: #9a9a9a;
+  --hint: #7a7a7a;
+  --accent: #f2f2f2;
+  --accent-contrast: #0f0f0f;
+  --accent-light: #bbbbbb;
+  --accent-dim: rgba(255,255,255,0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Mulish', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -53,7 +97,7 @@ header {
 }
 
 .logo {
-  font-family: 'Unbounded', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 0.2em;
@@ -106,7 +150,7 @@ header {
 }
 
 .hero-val {
-  font-family: 'Unbounded', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 26px;
   font-weight: 300;
   letter-spacing: -0.03em;
@@ -148,7 +192,7 @@ header {
 }
 
 .rash-val {
-  font-family: 'Unbounded', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 15px;
   font-weight: 300;
   color: var(--muted);
@@ -205,7 +249,7 @@ input[type="number"] {
   width: 118px;
   text-align: right;
   font-size: 15px;
-  font-family: 'Unbounded', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 300;
   color: var(--text);
   background: var(--surface2);
@@ -224,7 +268,7 @@ input[type="number"]:focus { border-color: var(--accent); }
 
 input[type="text"] {
   font-size: 13px;
-  font-family: 'Mulish', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
   color: var(--text);
   background: var(--surface2);
@@ -258,7 +302,7 @@ input::placeholder { color: var(--hint); }
 }
 
 .total-val {
-  font-family: 'Unbounded', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: 16px;
   font-weight: 300;
   color: var(--accent);
@@ -299,14 +343,14 @@ input::placeholder { color: var(--hint); }
   transition: color 0.15s, background 0.15s;
 }
 
-.del-btn:hover { color: var(--red); background: var(--red-bg); }
+.del-btn:hover { color: var(--accent-contrast); background: var(--accent); }
 
 .add-exp-btn {
   width: 100%;
   margin-top: 10px;
   padding: 8px;
   font-size: 12px;
-  font-family: 'Mulish', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   color: var(--hint);
   background: none;
   border: 1px dashed var(--border2);
@@ -321,22 +365,22 @@ input::placeholder { color: var(--hint); }
 /* Diff */
 .diff-ok {
   display: flex; align-items: center; gap: 8px;
-  background: var(--green-bg);
-  border: 1px solid rgba(58,125,82,0.15);
+  background: var(--surface2);
+  border: 1px solid rgba(0,0,0,0.1);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  font-size: 13px; color: var(--green);
+  font-size: 13px; color: var(--text);
   margin-top: 12px; font-weight: 500;
 }
 
 .diff-err {
   display: flex; align-items: center; gap: 8px;
-  background: var(--red-bg);
-  border: 1px solid rgba(184,64,64,0.15);
+  background: var(--accent);
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  font-size: 13px; color: var(--red);
-  margin-top: 12px; font-weight: 500;
+  font-size: 13px; color: var(--accent-contrast);
+  margin-top: 12px; font-weight: 600;
 }
 
 /* Copy */
@@ -345,9 +389,9 @@ input::placeholder { color: var(--hint); }
   margin-top: 1.25rem;
   padding: 16px;
   font-size: 13px;
-  font-family: 'Mulish', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
-  color: #fff;
+  color: var(--accent-contrast);
   background: var(--accent);
   border: none;
   border-radius: var(--radius);
@@ -627,7 +671,7 @@ header            { animation-delay: 0.04s; }
     text += `QR — ${Math.round(qr).toLocaleString('ru-RU')}`;
 
     if (rashLines) {
-      text += `\n\n${rashLines}`;
+      text += `\n\nРасходы\n${rashLines}`;
     }
 
     text += `\n\nВ кассе ${Math.round(faktNal).toLocaleString('ru-RU')}`;
@@ -712,23 +756,8 @@ header            { animation-delay: 0.04s; }
     document.body.removeChild(ta);
   }
 
-  function initTelegram(){
-    if(!window.Telegram || !window.Telegram.WebApp) return;
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    const p = tg.themeParams || {};
-    const root = document.documentElement.style;
-    if(p.bg_color) root.setProperty('--bg', p.bg_color);
-    if(p.secondary_bg_color) root.setProperty('--surface2', p.secondary_bg_color);
-    if(p.text_color) root.setProperty('--text', p.text_color);
-    if(p.hint_color) root.setProperty('--muted', p.hint_color);
-    if(p.button_color) root.setProperty('--accent', p.button_color);
-    if(p.section_bg_color) root.setProperty('--surface', p.section_bg_color);
+  function applyTelegramTheme(tg){
+    document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light');
   }
 
-  initTelegram();
-  renderExp();
-</script>
-</body>
-</html>
+  function init
