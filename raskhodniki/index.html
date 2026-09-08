@@ -3,32 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Расходники — Айда Чай Пить</title>
+<title>Расходники</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root{
-    --bg:#F1EEE3;
+    --bg:#FFFFFF;
     --surface:#FFFFFF;
-    --surface-muted:#EAE5D5;
-    --text:#2A2A22;
-    --text-muted:#7A7566;
-    --accent:#435A3C;
-    --accent-dark:#324429;
-    --low:#B8842E;
-    --low-bg:#FBF0DC;
-    --out:#9C3B2C;
-    --out-bg:#F8E4DE;
-    --border:#DCD6C2;
+    --surface-muted:#F0F0F0;
+    --text:#111111;
+    --text-muted:#6E6E6E;
+    --accent:#111111;
+    --accent-contrast:#FFFFFF;
+    --border:#DDDDDD;
     --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0F0F0F;
+      --surface:#1A1A1A;
+      --surface-muted:#262626;
+      --text:#F2F2F2;
+      --text-muted:#9A9A9A;
+      --accent:#F2F2F2;
+      --accent-contrast:#0F0F0F;
+      --border:#333333;
+    }
+  }
+  html[data-theme="light"]{
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-muted:#F0F0F0;
+    --text:#111111;
+    --text-muted:#6E6E6E;
+    --accent:#111111;
+    --accent-contrast:#FFFFFF;
+    --border:#DDDDDD;
+  }
+  html[data-theme="dark"]{
+    --bg:#0F0F0F;
+    --surface:#1A1A1A;
+    --surface-muted:#262626;
+    --text:#F2F2F2;
+    --text-muted:#9A9A9A;
+    --accent:#F2F2F2;
+    --accent-contrast:#0F0F0F;
+    --border:#333333;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:var(--bg);
     color:var(--text);
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
     -webkit-tap-highlight-color:transparent;
     min-height:100vh;
   }
@@ -56,9 +84,10 @@
     gap:12px;
   }
   h1{
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    font-size:22px;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-weight:700;
+    font-size:21px;
+    letter-spacing:-0.01em;
     line-height:1.15;
     margin:0 0 3px;
   }
@@ -84,7 +113,7 @@
   .edit-toggle.active{
     background:var(--accent);
     border-color:var(--accent);
-    color:#fff;
+    color:var(--accent-contrast);
   }
   .summary{
     display:flex;
@@ -100,16 +129,18 @@
     border:1px solid var(--border);
     color:var(--text-muted);
   }
-  .pill.low{background:var(--low-bg);color:var(--low);border-color:transparent;}
-  .pill.out{background:var(--out-bg);color:var(--out);border-color:transparent;}
+  .pill.low{background:var(--surface-muted);color:var(--text);border-color:transparent;}
+  .pill.out{background:var(--accent);color:var(--accent-contrast);border-color:transparent;}
 
   main{padding:6px 14px 0;flex:1;}
   .category{margin-top:22px;}
   .category-label{
-    font-family:'Fraunces',serif;
-    font-style:italic;
-    font-size:14.5px;
-    color:var(--accent-dark);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-size:12px;
+    color:var(--text-muted);
     margin:0 4px 8px;
   }
   .items{
@@ -129,8 +160,8 @@
     transition:background .15s ease;
   }
   .item:last-child{border-bottom:none;}
-  .item[data-state="low"]{background:var(--low-bg);}
-  .item[data-state="out"]{background:var(--out-bg);}
+  .item[data-state="low"]{background:var(--surface-muted);}
+  .item[data-state="out"]{background:var(--accent);}
   .item-name{
     font-size:15px;
     line-height:1.35;
@@ -139,6 +170,7 @@
   }
   .item[data-state="low"] .item-name,
   .item[data-state="out"] .item-name{font-weight:600;}
+  .item[data-state="out"] .item-name{color:var(--accent-contrast);}
   .state-chip{
     font-size:12px;
     color:var(--text-muted);
@@ -146,16 +178,16 @@
     min-width:30px;
     text-align:right;
   }
-  .item[data-state="low"] .state-chip{color:var(--low);}
-  .item[data-state="out"] .state-chip{color:var(--out);}
+  .item[data-state="low"] .state-chip{color:var(--text);}
+  .item[data-state="out"] .state-chip{color:var(--accent-contrast);}
   .item-delete{
     margin-left:10px;
     width:26px;
     height:26px;
     border-radius:50%;
     border:none;
-    background:var(--out-bg);
-    color:var(--out);
+    background:var(--accent);
+    color:var(--accent-contrast);
     font-size:14px;
     line-height:1;
     display:flex;
@@ -183,7 +215,7 @@
   .add-row button{
     border:none;
     background:var(--accent);
-    color:#fff;
+    color:var(--accent-contrast);
     border-radius:9px;
     padding:0 14px;
     font-size:13px;
@@ -207,7 +239,7 @@
     margin:22px auto 4px;
     background:none;
     border:none;
-    color:var(--out);
+    color:var(--text-muted);
     font-size:13px;
     text-decoration:underline;
     cursor:pointer;
@@ -246,7 +278,7 @@
   }
   .btn-primary{
     background:var(--accent);
-    color:#fff;
+    color:var(--accent-contrast);
   }
   .btn-primary:disabled{
     background:var(--surface-muted);
@@ -254,13 +286,13 @@
     cursor:default;
   }
   .btn:focus-visible, .edit-toggle:focus-visible, .item:focus-visible{
-    outline:2px solid var(--accent-dark);
+    outline:2px solid var(--accent);
     outline-offset:2px;
   }
 
   .overlay{
     position:fixed;inset:0;
-    background:rgba(30,28,20,.4);
+    background:rgba(0,0,0,.5);
     display:flex;
     align-items:flex-end;
     z-index:20;
@@ -274,9 +306,9 @@
     padding:20px 18px calc(20px + env(safe-area-inset-bottom));
   }
   .sheet h2{
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    font-size:18px;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-weight:700;
+    font-size:17px;
     margin:0 0 12px;
   }
   .sheet textarea{
@@ -296,13 +328,14 @@
   .sheet-actions a, .sheet-actions button{text-decoration:none;text-align:center;}
   .copied-note{
     font-size:12.5px;
-    color:var(--accent-dark);
+    color:var(--accent);
     text-align:center;
     margin:8px 0 0;
     min-height:16px;
   }
   .copied-note.send-error{
-    color:var(--out);
+    color:var(--text);
+    font-weight:700;
   }
   .loading, .empty{
     text-align:center;
@@ -461,7 +494,7 @@
     var html = '';
     html += '<header>';
     html +=   '<div class="header-row">';
-    html +=     '<div><h1>Расходники</h1><p class="subtitle">«Айда Чай Пить» · еженедельная проверка</p></div>';
+    html +=     '<div><h1>Расходники</h1><p class="subtitle">еженедельная проверка</p></div>';
     html +=     '<button class="edit-toggle'+(editMode?' active':'')+'" id="editToggle" aria-label="Редактировать список">'+(editMode?'✓':'✎')+'</button>';
     html +=   '</div>';
     html +=   '<div class="summary">';
@@ -712,19 +745,21 @@
     });
   }
 
+  function applyTelegramTheme(tg){
+    document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light');
+  }
+
   function initTelegram(){
     if(!window.Telegram || !window.Telegram.WebApp) return;
     var tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    var p = tg.themeParams || {};
-    var root = document.documentElement.style;
-    if(p.bg_color) root.setProperty('--bg', p.bg_color);
-    if(p.secondary_bg_color) root.setProperty('--surface-muted', p.secondary_bg_color);
-    if(p.text_color) root.setProperty('--text', p.text_color);
-    if(p.hint_color) root.setProperty('--text-muted', p.hint_color);
-    if(p.button_color) root.setProperty('--accent', p.button_color);
-    if(p.section_bg_color) root.setProperty('--surface', p.section_bg_color);
+    applyTelegramTheme(tg);
+    if(tg.onEvent){
+      tg.onEvent('themeChanged', function(){ applyTelegramTheme(tg); });
+    }
+    // Только светлая/тёмная схема из Telegram — сами цвета
+    // из themeParams не берём, чтобы дизайн оставался чёрно-белым.
   }
 
   async function init(){
