@@ -257,6 +257,11 @@
     max-width:480px;
     width:100%;
     display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .actionbar-row{
+    display:flex;
     gap:10px;
   }
   .btn{
@@ -273,8 +278,6 @@
     background:var(--surface);
     border:1px solid var(--border);
     color:var(--text);
-    flex:0 0 auto;
-    padding:13px 16px;
   }
   .btn-primary{
     background:var(--accent);
@@ -282,6 +285,10 @@
   }
   .btn-primary:disabled{
     background:var(--surface-muted);
+    color:var(--text-muted);
+    cursor:default;
+  }
+  .btn-secondary:disabled{
     color:var(--text-muted);
     cursor:default;
   }
@@ -537,8 +544,11 @@
     html += '</main>';
 
     html += '<div class="actionbar"><div class="actionbar-inner">';
-    html +=   '<button class="btn btn-secondary" id="resetBtn">Сбросить</button>';
     html +=   '<button class="btn btn-primary" id="sendBtn" '+(msg?'':'disabled')+'>Отправить список</button>';
+    html +=   '<div class="actionbar-row">';
+    html +=     '<button class="btn btn-secondary" id="resetBtn">Сбросить</button>';
+    html +=     '<button class="btn btn-secondary" id="copyBtn2" '+(msg?'':'disabled')+'>Скопировать</button>';
+    html +=   '</div>';
     html += '</div></div>';
 
     app.innerHTML = html;
@@ -565,6 +575,11 @@
     var sendBtn = document.getElementById('sendBtn');
     if(sendBtn){
       sendBtn.addEventListener('click', openSendSheet);
+    }
+
+    var copyBtn2 = document.getElementById('copyBtn2');
+    if(copyBtn2){
+      copyBtn2.addEventListener('click', copyListDirect);
     }
 
     document.querySelectorAll('.item').forEach(function(row){
@@ -663,16 +678,51 @@
 
   async function sendToTelegram(text){
     var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
+    var body = { chat_id: TELEGRAM_CHAT_ID, text: text };
+    if(TELEGRAM_THREAD_ID){
+      body.message_thread_id = TELEGRAM_THREAD_ID;
+    }
     var res = await fetch(url, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, message_thread_id: TELEGRAM_THREAD_ID, text: text })
+      body: JSON.stringify(body)
     });
     var payload = await res.json();
     if(!payload.ok){
       throw new Error(payload.description || 'Telegram вернул ошибку');
     }
     return payload;
+  }
+
+  async function copyListDirect(){
+    var msg = buildMessage();
+    if(!msg) return;
+    var btn = document.getElementById('copyBtn2');
+    var original = btn.textContent;
+    function onCopied(){
+      btn.textContent = 'Скопировано ✓';
+      setTimeout(function(){ btn.textContent = original; }, 1800);
+    }
+    try{
+      await navigator.clipboard.writeText(msg);
+      onCopied();
+    }catch(e){
+      var area = document.createElement('textarea');
+      area.value = msg;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.focus();
+      area.select();
+      try{
+        document.execCommand('copy');
+        onCopied();
+      }catch(e2){
+        btn.textContent = 'Не удалось скопировать';
+        setTimeout(function(){ btn.textContent = original; }, 1800);
+      }
+      document.body.removeChild(area);
+    }
   }
 
   function openSendSheet(){
