@@ -47,7 +47,7 @@
     --surface-muted:#262626;
     --text:#F2F2F2;
     --text-muted:#9A9A9A;
-    --accent:#F2F2F2;
+    --accent:#F2F2;
     --accent-contrast:#0F0F0F;
     --border:#333333;
   }
@@ -123,7 +123,7 @@
   }
   .pill{
     font-size:12.5px;
-    padding:5px 11px;
+    pading:5px 11px;
     border-radius:100px;
     background:var(--surface);
     border:1px solid var(--border);
@@ -362,463 +362,593 @@
 
 <script>
 (function(){
-  var STORAGE_KEY = 'raskhodniki-data-v1';
+  'use strict';
 
-  var TELEGRAM_BOT_TOKEN = '';
-  var TELEGRAM_CHAT_ID = '-1002628442313';
-  var TELEGRAM_THREAD_ID = 7;
+  /* =========================================================
+     CONFIG — все константы и настройки приложения в одном месте
+     ========================================================= */
+  var Config = {
+    STORAGE_KEY: 'raskhodniki-data-v1',
 
-  var DEFAULT_DATA = {
-    categories: [
-      { id:'c1', name:'Уборка и гигиена', items:[
-        {id:'i1', name:'Тряпки для чабаней', state:'ok'},
-        {id:'i2', name:'Губки для мытья посуды', state:'ok'},
-        {id:'i3', name:'Мусорные мешки', state:'ok'},
-        {id:'i4', name:'Бумажные полотенца', state:'ok'},
-        {id:'i5', name:'Туалетная бумага', state:'ok'}
-      ]},
-      { id:'c2', name:'Печать и касса', items:[
-        {id:'i6', name:'Наклейки для принтера (70x50)', state:'ok'},
-        {id:'i7', name:'Чеки для терминала', state:'ok'},
-        {id:'i8', name:'Чеки для кассы', state:'ok'},
-        {id:'i9', name:'Риббон', state:'ok'}
-      ]},
-      { id:'c3', name:'Упаковка', items:[
-        {id:'i10', name:'Конверты для блинов прозрачные (35х20)', state:'ok'},
-        {id:'i11', name:'Конверты для блинов', state:'ok'},
-        {id:'i12', name:'Пакеты для банок (29.5х20)', state:'ok'},
-        {id:'i13', name:'Крафтовые пакеты маленькие с ручками (21,5х24,5)', state:'ok'},
-        {id:'i14', name:'Крафтовые пакеты большие с ручками', state:'ok'},
-        {id:'i15', name:'Крафтовые пакеты маленькие', state:'ok'},
-        {id:'i16', name:'Зип пакеты', state:'ok'},
-        {id:'i17', name:'Зип пакет чёрный (12x8)', state:'ok'},
-        {id:'i18', name:'Зип пакет белый (12x8)', state:'ok'}
-      ]},
-      { id:'c4', name:'Посуда и подача', items:[
-        {id:'i19', name:'Капхолдеры', state:'ok'},
-        {id:'i20', name:'Сито для стаканов', state:'ok'},
-        {id:'i21', name:'Стаканы (для трав)', state:'ok'},
-        {id:'i22', name:'Стаканы (чай с собой)', state:'ok'},
-        {id:'i23', name:'Крышки (чай с собой)', state:'ok'}
-      ]},
-      { id:'c5', name:'Прочее', items:[
-        {id:'i24', name:'Лампочки', state:'ok'}
-      ]}
-    ]
+    STATE_ORDER: ['ok', 'low', 'out'],
+    STATE_LABEL: { ok: '', low: 'мало', out: 'нет' },
+
+    DEFAULT_DATA: {
+      categories: [
+        { id:'c1', name:'Уборка и гигиена', items:[
+          {id:'i1', name:'Тряпки для чабаней', state:'ok'},
+          {id:'i2', name:'Губки для мытья посуды', state:'ok'},
+          {id:'i3', name:'Мусорные мешки', state:'ok'},
+          {id:'i4', name:'Бумажные полотенца', state:'ok'},
+          {id:'i5', name:'Туалетная бумага', state:'ok'}
+        ]},
+        { id:'c2', name:'Печать и касса', items:[
+          {id:'i6', name:'Наклейки для принтера (70x50)', state:'ok'},
+          {id:'i7', name:'Чеки для терминала', state:'ok'},
+          {id:'i8', name:'Чеки для кассы', state:'ok'},
+          {id:'i9', name:'Риббон', state:'ok'}
+        ]},
+        { id:'c3', name:'Упаковка', items:[
+          {id:'i10', name:'Конверты для блинов прозрачные (35х20)', state:'ok'},
+          {id:'i11', name:'Конверты для блинов', state:'ok'},
+          {id:'i12', name:'Пакеты для банок (29.5х20)', state:'ok'},
+          {id:'i13', name:'Крафтовые пакеты маленькие с ручками (21,5х24,5)', state:'ok'},
+          {id:'i14', name:'Крафтовые пакеты большие с ручками', state:'ok'},
+          {id:'i15', name:'Крафтовые пакеты маленькие', state:'ok'},
+          {id:'i16', name:'Зип пакеты', state:'ok'},
+          {id:'i17', name:'Зип пакет чёрный (12x8)', state:'ok'},
+          {id:'i18', name:'Зип пакет белый (12x8)', state:'ok'}
+        ]},
+        { id:'c4', name:'Посуда и подача', items:[
+          {id:'i19', name:'Капхолдеры', state:'ok'},
+          {id:'i20', name:'Сито для стаканов', state:'ok'},
+          {id:'i21', name:'Стаканы (для трав)', state:'ok'},
+          {id:'i22', name:'Стаканы (чай с собой)', state:'ok'},
+          {id:'i23', name:'Крышки (чай с собой)', state:'ok'}
+        ]},
+        { id:'c5', name:'Прочее', items:[
+          {id:'i24', name:'Лампочки', state:'ok'}
+        ]}
+      ]
+    }
   };
 
-  var STATE_ORDER = ['ok','low','out'];
-  var STATE_LABEL = { ok:'', low:'мало', out:'нет' };
+  /* =========================================================
+     STORE (МОДЕЛЬ) — вся работа с данными и localStorage.
+     Ничего не знает про DOM/HTML.
+     ========================================================= */
+  var Store = {
+    data: null,
 
-  var data = null;
-  var editMode = false;
+    /* --- утилиты --- */
+    _uid: function(prefix){
+      return prefix + Math.random().toString(36).slice(2, 9);
+    },
+    _clone: function(obj){
+      return JSON.parse(JSON.stringify(obj));
+    },
+    _findCategory: function(catId){
+      return this.data.categories.find(function(c){ return c.id === catId; });
+    },
+    _findItem: function(catId, itemId){
+      var cat = this._findCategory(catId);
+      return cat ? cat.items.find(function(i){ return i.id === itemId; }) : null;
+    },
+    _cycleState: function(current){
+      var idx = Config.STATE_ORDER.indexOf(current);
+      return Config.STATE_ORDER[(idx + 1) % Config.STATE_ORDER.length];
+    },
+    _todayStr: function(){
+      var d = new Date();
+      var dd = String(d.getDate()).padStart(2, '0');
+      var mm = String(d.getMonth() + 1).padStart(2, '0');
+      return dd + '.' + mm + '.' + d.getFullYear();
+    },
 
-  function uid(prefix){
-    return prefix + Math.random().toString(36).slice(2,9);
-  }
+    /* --- персистентность --- */
+    load: function(){
+      try{
+        var raw = localStorage.getItem(Config.STORAGE_KEY);
+        if(raw){
+          this.data = JSON.parse(raw);
+          return;
+        }
+      }catch(e){
+        // хранилище недоступно или пусто — используем данные по умолчанию
+      }
+      this.data = this._clone(Config.DEFAULT_DATA);
+      this.save();
+    },
+    save: function(){
+      try{
+        localStorage.setItem(Config.STORAGE_KEY, JSON.stringify(this.data));
+      }catch(e){
+        console.error('Не удалось сохранить список', e);
+      }
+    },
+    restoreDefaults: function(){
+      this.data = this._clone(Config.DEFAULT_DATA);
+      this.save();
+    },
 
-  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+    /* --- мутации состояния позиций --- */
+    toggleItemState: function(catId, itemId){
+      var item = this._findItem(catId, itemId);
+      if(!item) return;
+      item.state = this._cycleState(item.state);
+      this.save();
+    },
+    resetAllStates: function(){
+      this.data.categories.forEach(function(cat){
+        cat.items.forEach(function(it){ it.state = 'ok'; });
+      });
+      this.save();
+    },
 
-  async function loadData(){
-    try{
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        data = JSON.parse(raw);
+    /* --- CRUD позиций --- */
+    addItem: function(catId, name){
+      var cat = this._findCategory(catId);
+      if(!cat || !name.trim()) return;
+      cat.items.push({ id: this._uid('i'), name: name.trim(), state: 'ok' });
+      this.save();
+    },
+    deleteItem: function(catId, itemId){
+      var cat = this._findCategory(catId);
+      if(!cat) return;
+      cat.items = cat.items.filter(function(i){ return i.id !== itemId; });
+      this.save();
+    },
+    renameItem: function(catId, itemId, newName){
+      var item = this._findItem(catId, itemId);
+      if(!item || !newName.trim()) return;
+      item.name = newName.trim();
+      this.save();
+    },
+
+    /* --- CRUD категорий --- */
+    addCategory: function(name){
+      if(!name.trim()) return;
+      this.data.categories.push({ id: this._uid('c'), name: name.trim(), items: [] });
+      this.save();
+    },
+
+    /* --- агрегаты --- */
+    counts: function(){
+      var low = 0, out = 0;
+      this.data.categories.forEach(function(cat){
+        cat.items.forEach(function(it){
+          if(it.state === 'low') low++;
+          if(it.state === 'out') out++;
+        });
+      });
+      return { low: low, out: out };
+    },
+
+    /* --- сборка финального текста заявки --- */
+    buildMessage: function(){
+      var out = [], low = [];
+      this.data.categories.forEach(function(cat){
+        cat.items.forEach(function(it){
+          if(it.state === 'out') out.push(it.name);
+          else if(it.state === 'low') low.push(it.name);
+        });
+      });
+      if(!out.length && !low.length) return null;
+
+      var lines = ['Расходники на закупку (' + this._todayStr() + '):', ''];
+      if(out.length){
+        lines.push('Закончилось:');
+        out.forEach(function(n){ lines.push('- ' + n); });
+        lines.push('');
+      }
+      if(low.length){
+        lines.push('Мало, есть остаток:');
+        low.forEach(function(n){ lines.push('- ' + n); });
+      }
+      return lines.join('\n').trim();
+    }
+  };
+
+  /* =========================================================
+     UI (ПРЕДСТАВЛЕНИЕ) — чистые функции: данные -> HTML-строка.
+     Никаких побочных эффектов, никакой работы с localStorage.
+     ========================================================= */
+  var UI = {
+    escapeHtml: function(s){
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    },
+
+    renderHeader: function(counts, editMode){
+      var summary;
+      if(counts.out || counts.low){
+        summary =
+          (counts.out ? '<span class="pill out">закончилось: ' + counts.out + '</span>' : '') +
+          (counts.low ? '<span class="pill low">мало: ' + counts.low + '</span>' : '');
+      }else{
+        summary = '<span class="pill">пока всё в порядке</span>';
+      }
+      return (
+        '<header>' +
+          '<div class="header-row">' +
+            '<div><h1>Расходники</h1><p class="subtitle">еженедельная проверка</p></div>' +
+            '<button class="edit-toggle' + (editMode ? ' active' : '') + '" data-action="toggle-edit" aria-label="Редактировать список">' + (editMode ? '✓' : '✎') + '</button>' +
+          '</div>' +
+          '<div class="summary">' + summary + '</div>' +
+        '</header>'
+      );
+    },
+
+    renderItem: function(cat, item, editMode){
+      var self = this;
+      var body = editMode
+        ? (
+            '<span class="item-name" data-action="rename-item" data-cat="' + cat.id + '" data-item="' + item.id + '">' + self.escapeHtml(item.name) + '</span>' +
+            '<button class="item-delete" data-action="delete-item" data-cat="' + cat.id + '" data-item="' + item.id + '" aria-label="Удалить">×</button>'
+          )
+        : (
+            '<span class="item-name">' + self.escapeHtml(item.name) + '</span>' +
+            '<span class="state-chip">' + Config.STATE_LABEL[item.state] + '</span>'
+          );
+
+      return (
+        '<div class="item" tabindex="0" data-state="' + item.state + '" ' +
+             (editMode ? '' : 'data-action="toggle-item" ') +
+             'data-cat="' + cat.id + '" data-item="' + item.id + '">' +
+          body +
+        '</div>'
+      );
+    },
+
+    renderCategory: function(cat, editMode){
+      var self = this;
+      var itemsHtml = cat.items.map(function(item){ return self.renderItem(cat, item, editMode); }).join('');
+
+      var addRow = editMode
+        ? (
+            '<div class="add-row">' +
+              '<input type="text" placeholder="Новая позиция…" data-role="add-input" data-cat="' + cat.id + '">' +
+              '<button data-action="add-item" data-cat="' + cat.id + '">Добавить</button>' +
+            '</div>'
+          )
+        : '';
+
+      return (
+        '<div class="category" data-cat="' + cat.id + '">' +
+          '<p class="category-label">' + self.escapeHtml(cat.name) + '</p>' +
+          '<div class="items">' + itemsHtml + '</div>' +
+          addRow +
+        '</div>'
+      );
+    },
+
+    renderMain: function(categories, editMode){
+      var self = this;
+      var categoriesHtml = categories.map(function(cat){ return self.renderCategory(cat, editMode); }).join('');
+
+      var editExtras = editMode
+        ? (
+            '<button class="add-category" data-action="add-category">+ Добавить категорию</button>' +
+            '<button class="restore-defaults" data-action="restore-defaults">Восстановить список по умолчанию</button>'
+          )
+        : '';
+
+      return '<main>' + categoriesHtml + editExtras + '</main>';
+    },
+
+    renderActionbar: function(hasMessage){
+      var disabledAttr = hasMessage ? '' : 'disabled';
+      return (
+        '<div class="actionbar"><div class="actionbar-iner">' +
+          '<button class="btn btn-primary" data-action="open-send-sheet" ' + disabledAttr + '>Отправить список</button>' +
+          '<div class="actionbar-row">' +
+            '<button class="btn btn-secondary" data-action="reset-all">Сбросить</button>' +
+            '<button class="btn btn-secondary" data-action="copy-list" ' + disabledAttr + '>Скопировать</button>' +
+          '</div>' +
+        '</div></div>'
+      );
+    },
+
+    renderApp: function(state){
+      var msg = state.message;
+      return (
+        this.renderHeader(state.counts, state.editMode) +
+        this.renderMain(state.categories, state.editMode) +
+        this.renderActionbar(!!msg)
+      );
+    },
+
+    renderSendSheet: function(message){
+      return (
+        '<div class="overlay" data-role="overlay">' +
+          '<div class="sheet">' +
+            '<h2>Список на закупку</h2>' +
+            '<textarea id="msgArea" readonly>' + this.escapeHtml(message) + '</textarea>' +
+            '<div class="sheet-actions">' +
+              '<button class="btn btn-primary" data-action="send-tg">Отправить в группу</button>' +
+              '<button class="btn btn-secondary" data-action="copy-sheet-text">Скопировать текст</button>' +
+              '<button class="btn btn-secondary" data-action="close-sheet">Закрыть</button>' +
+            '</div>' +
+            '<p class="copied-note" id="statusNote"></p>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+  };
+
+  /* =========================================================
+     CONTROLLER — связывает Store и UI, обрабатывает события
+     через делегирование на document.body (единственный listener).
+     ========================================================= */
+  var App = {
+    editMode: false,
+    appEl: null,
+
+    init: function(){
+      this.appEl = document.getElementById('app');
+      this.initTelegram();
+      Store.load();
+      this.render();
+      this.initEvents();
+    },
+
+    /* --- сборка текущего состояния для UI.renderApp --- */
+    getViewState: function(){
+      return {
+        categories: Store.data.categories,
+        counts: Store.counts(),
+        message: Store.buildMessage(),
+        editMode: this.editMode
+      };
+    },
+
+    render: function(){
+      this.appEl.innerHTML = UI.renderApp(this.getViewState());
+    },
+
+    /* --- единая точка входа для всех кликов приложения --- */
+    initEvents: function(){
+      document.body.addEventListener('click', this.handleClick.bind(this));
+      document.body.addEventListener('keydown', this.handleKeydown.bind(this));
+    },
+
+    handleKeydown: function(e){
+      if(e.key !== 'Enter' && e.key !== ' ') return;
+
+      var addInput = e.target.closest('[data-role="add-input"]');
+      if(addInput){
+        e.preventDefault();
+        this.addItem(addInput.getAttribute('data-cat'), addInput.value);
         return;
       }
-    }catch(e){
-      // storage unavailable or empty — fall through to defaults
-    }
-    data = clone(DEFAULT_DATA);
-    await saveData();
-  }
 
-  async function saveData(){
-    try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }catch(e){
-      console.error('Не удалось сохранить список', e);
-    }
-  }
-
-  function cycleState(current){
-    var idx = STATE_ORDER.indexOf(current);
-    return STATE_ORDER[(idx+1) % STATE_ORDER.length];
-  }
-
-  function todayStr(){
-    var d = new Date();
-    var dd = String(d.getDate()).padStart(2,'0');
-    var mm = String(d.getMonth()+1).padStart(2,'0');
-    return dd+'.'+mm+'.'+d.getFullYear();
-  }
-
-  function buildMessage(){
-    var out=[], low=[];
-    data.categories.forEach(function(cat){
-      cat.items.forEach(function(it){
-        if(it.state==='out') out.push(it.name);
-        else if(it.state==='low') low.push(it.name);
-      });
-    });
-    if(!out.length && !low.length) return null;
-    var lines = ['Расходники на закупку ('+todayStr()+'):',''];
-    if(out.length){
-      lines.push('Закончилось:');
-      out.forEach(function(n){ lines.push('- '+n); });
-      lines.push('');
-    }
-    if(low.length){
-      lines.push('Мало, есть остаток:');
-      low.forEach(function(n){ lines.push('- '+n); });
-    }
-    return lines.join('\n').trim();
-  }
-
-  function resetAllStates(){
-    data.categories.forEach(function(cat){
-      cat.items.forEach(function(it){ it.state = 'ok'; });
-    });
-    saveData();
-  }
-
-  function counts(){
-    var low=0, out=0;
-    data.categories.forEach(function(cat){
-      cat.items.forEach(function(it){
-        if(it.state==='low') low++;
-        if(it.state==='out') out++;
-      });
-    });
-    return {low:low, out:out};
-  }
-
-  function render(){
-    var app = document.getElementById('app');
-    var c = counts();
-    var msg = buildMessage();
-
-    var html = '';
-    html += '<header>';
-    html +=   '<div class="header-row">';
-    html +=     '<div><h1>Расходники</h1><p class="subtitle">еженедельная проверка</p></div>';
-    html +=     '<button class="edit-toggle'+(editMode?' active':'')+'" id="editToggle" aria-label="Редактировать список">'+(editMode?'✓':'✎')+'</button>';
-    html +=   '</div>';
-    html +=   '<div class="summary">';
-    html +=     (c.out || c.low) ?
-                  (c.out? '<span class="pill out">закончилось: '+c.out+'</span>' : '') +
-                  (c.low? '<span class="pill low">мало: '+c.low+'</span>' : '')
-                  : '<span class="pill">пока всё в порядке</span>';
-    html +=   '</div>';
-    html += '</header>';
-
-    html += '<main>';
-    data.categories.forEach(function(cat){
-      html += '<div class="category" data-cat="'+cat.id+'">';
-      html +=   '<p class="category-label">'+cat.name+'</p>';
-      html +=   '<div class="items">';
-      cat.items.forEach(function(it){
-        html += '<div class="item" tabindex="0" data-cat="'+cat.id+'" data-item="'+it.id+'" data-state="'+it.state+'">';
-        if(editMode){
-          html += '<span class="item-name" data-editable="1">'+escapeHtml(it.name)+'</span>';
-          html += '<button class="item-delete" data-del-cat="'+cat.id+'" data-del-item="'+it.id+'" aria-label="Удалить">×</button>';
-        }else{
-          html += '<span class="item-name">'+escapeHtml(it.name)+'</span>';
-          html += '<span class="state-chip">'+STATE_LABEL[it.state]+'</span>';
-        }
-        html += '</div>';
-      });
-      html +=   '</div>';
-      if(editMode){
-        html += '<div class="add-row">';
-        html +=   '<input type="text" placeholder="Новая позиция…" data-add-input="'+cat.id+'">';
-        html +=   '<button data-add-btn="'+cat.id+'">Добавить</button>';
-        html += '</div>';
+      var itemRow = e.target.closest('.item[data-action="toggle-item"]');
+      if(itemRow){
+        e.preventDefault();
+        this.toggleItem(itemRow.getAttribute('data-cat'), itemRow.getAttribute('data-item'));
       }
-      html += '</div>';
-    });
-    if(editMode){
-      html += '<button class="add-category" id="addCategory">+ Добавить категорию</button>';
-      html += '<button class="restore-defaults" id="restoreDefaults">Восстановить список по умолчанию</button>';
-    }
-    html += '</main>';
+    },
 
-    html += '<div class="actionbar"><div class="actionbar-inner">';
-    html +=   '<button class="btn btn-primary" id="sendBtn" '+(msg?'':'disabled')+'>Отправить список</button>';
-    html +=   '<div class="actionbar-row">';
-    html +=     '<button class="btn btn-secondary" id="resetBtn">Сбросить</button>';
-    html +=     '<button class="btn btn-secondary" id="copyBtn2" '+(msg?'':'disabled')+'>Скопировать</button>';
-    html +=   '</div>';
-    html += '</div></div>';
-
-    app.innerHTML = html;
-    attachHandlers();
-  }
-
-  function escapeHtml(s){
-    var d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
-
-  function attachHandlers(){
-    document.getElementById('editToggle').addEventListener('click', function(){
-      editMode = !editMode;
-      render();
-    });
-
-    document.getElementById('resetBtn').addEventListener('click', function(){
-      resetAllStates();
-      render();
-    });
-
-    var sendBtn = document.getElementById('sendBtn');
-    if(sendBtn){
-      sendBtn.addEventListener('click', openSendSheet);
-    }
-
-    var copyBtn2 = document.getElementById('copyBtn2');
-    if(copyBtn2){
-      copyBtn2.addEventListener('click', copyListDirect);
-    }
-
-    document.querySelectorAll('.item').forEach(function(row){
-      row.addEventListener('click', function(e){
-        if(editMode) return; // in edit mode, tap doesn't cycle state
-        var catId = row.getAttribute('data-cat');
-        var itemId = row.getAttribute('data-item');
-        var cat = data.categories.find(function(c){return c.id===catId;});
-        var item = cat.items.find(function(i){return i.id===itemId;});
-        item.state = cycleState(item.state);
-        saveData();
-        render();
-      });
-      row.addEventListener('keydown', function(e){
-        if(!editMode && (e.key==='Enter' || e.key===' ')){
-          e.preventDefault();
-          row.click();
-        }
-      });
-    });
-
-    document.querySelectorAll('.item-name[data-editable]').forEach(function(nameEl){
-      nameEl.addEventListener('click', function(e){
-        e.stopPropagation();
-        var row = nameEl.closest('.item');
-        var catId = row.getAttribute('data-cat');
-        var itemId = row.getAttribute('data-item');
-        var cat = data.categories.find(function(c){return c.id===catId;});
-        var item = cat.items.find(function(i){return i.id===itemId;});
-        var next = prompt('Название позиции:', item.name);
-        if(next && next.trim()){
-          item.name = next.trim();
-          saveData();
-          render();
-        }
-      });
-    });
-
-    document.querySelectorAll('[data-del-item]').forEach(function(btn){
-      btn.addEventListener('click', function(e){
-        e.stopPropagation();
-        var catId = btn.getAttribute('data-del-cat');
-        var itemId = btn.getAttribute('data-del-item');
-        var cat = data.categories.find(function(c){return c.id===catId;});
-        cat.items = cat.items.filter(function(i){return i.id!==itemId;});
-        saveData();
-        render();
-      });
-    });
-
-    document.querySelectorAll('[data-add-btn]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var catId = btn.getAttribute('data-add-btn');
-        var input = document.querySelector('[data-add-input="'+catId+'"]');
-        var val = input.value.trim();
-        if(!val) return;
-        var cat = data.categories.find(function(c){return c.id===catId;});
-        cat.items.push({id:uid('i'), name:val, state:'ok'});
-        saveData();
-        render();
-      });
-    });
-
-    document.querySelectorAll('[data-add-input]').forEach(function(input){
-      input.addEventListener('keydown', function(e){
-        if(e.key==='Enter'){
-          e.preventDefault();
-          document.querySelector('[data-add-btn="'+input.getAttribute('data-add-input')+'"]').click();
-        }
-      });
-    });
-
-    var addCatBtn = document.getElementById('addCategory');
-    if(addCatBtn){
-      addCatBtn.addEventListener('click', function(){
-        var name = prompt('Название категории:');
-        if(name && name.trim()){
-          data.categories.push({id:uid('c'), name:name.trim(), items:[]});
-          saveData();
-          render();
-        }
-      });
-    }
-
-    var restoreBtn = document.getElementById('restoreDefaults');
-    if(restoreBtn){
-      restoreBtn.addEventListener('click', function(){
-        if(confirm('Заменить текущий список списком по умолчанию? Текущие позиции и отметки будут потеряны.')){
-          data = clone(DEFAULT_DATA);
-          saveData();
-          render();
-        }
-      });
-    }
-  }
-
-  async function sendToTelegram(text){
-    var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
-    var body = { chat_id: TELEGRAM_CHAT_ID, text: text };
-    if(TELEGRAM_THREAD_ID){
-      body.message_thread_id = TELEGRAM_THREAD_ID;
-    }
-    var res = await fetch(url, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
-    var payload = await res.json();
-    if(!payload.ok){
-      throw new Error(payload.description || 'Telegram вернул ошибку');
-    }
-    return payload;
-  }
-
-  async function copyListDirect(){
-    var msg = buildMessage();
-    if(!msg) return;
-    var btn = document.getElementById('copyBtn2');
-    var original = btn.textContent;
-    function onCopied(){
-      btn.textContent = 'Скопировано ✓';
-      setTimeout(function(){ btn.textContent = original; }, 1800);
-    }
-    try{
-      await navigator.clipboard.writeText(msg);
-      onCopied();
-    }catch(e){
-      var area = document.createElement('textarea');
-      area.value = msg;
-      area.style.position = 'fixed';
-      area.style.opacity = '0';
-      document.body.appendChild(area);
-      area.focus();
-      area.select();
-      try{
-        document.execCommand('copy');
-        onCopied();
-      }catch(e2){
-        btn.textContent = 'Не удалось скопировать';
-        setTimeout(function(){ btn.textContent = original; }, 1800);
+    handleClick: function(e){
+      var overlay = e.target.closest('[data-role="overlay"]');
+      if(overlay && e.target === overlay){
+        this.closeSendSheet();
+        return;
       }
-      document.body.removeChild(area);
-    }
-  }
 
-  function openSendSheet(){
-    var msg = buildMessage();
-    if(!msg) return;
-    var overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    overlay.id = 'overlay';
-    overlay.innerHTML =
-      '<div class="sheet">' +
-        '<h2>Список на закупку</h2>' +
-        '<textarea id="msgArea" readonly>'+escapeHtml(msg)+'</textarea>' +
-        '<div class="sheet-actions">' +
-          '<button class="btn btn-primary" id="sendTgBtn">Отправить в группу</button>' +
-          '<button class="btn btn-secondary" id="copyBtn">Скопировать текст</button>' +
-          '<button class="btn btn-secondary" id="closeSheet">Закрыть</button>' +
-        '</div>' +
-        '<p class="copied-note" id="statusNote"></p>' +
-      '</div>';
-    document.body.appendChild(overlay);
+      var target = e.target.closest('[data-action]');
+      if(!target) return;
 
-    overlay.addEventListener('click', function(e){
-      if(e.target === overlay) document.body.removeChild(overlay);
-    });
-    document.getElementById('closeSheet').addEventListener('click', function(){
-      document.body.removeChild(overlay);
-    });
+      var action = target.getAttribute('data-action');
+      var catId = target.getAttribute('data-cat');
+      var itemId = target.getAttribute('data-item');
 
-    document.getElementById('sendTgBtn').addEventListener('click', async function(){
-      var btn = this;
-      var note = document.getElementById('statusNote');
-      note.classList.remove('send-error');
-      btn.disabled = true;
-      btn.textContent = 'Отправляем…';
-      try{
-        await sendToTelegram(msg);
-        note.textContent = 'Отправлено в группу ✓';
-        resetAllStates();
-        setTimeout(function(){
-          if(document.body.contains(overlay)) document.body.removeChild(overlay);
-          render();
-        }, 900);
-      }catch(err){
-        btn.disabled = false;
-        btn.textContent = 'Отправить в группу';
-        note.classList.add('send-error');
-        note.textContent = 'Не получилось отправить: ' + err.message + '. Можно скопировать текст и отправить вручную.';
+      switch(action){
+        case 'toggle-edit':
+          this.editMode = !this.editMode;
+          this.render();
+          break;
+
+        case 'toggle-item':
+          this.toggleItem(catId, itemId);
+          break;
+
+        case 'rename-item':
+          e.stopPropagation();
+          this.renameItem(catId, itemId);
+          break;
+
+        case 'delete-item':
+          e.stopPropagation();
+          Store.deleteItem(catId, itemId);
+          this.render();
+          break;
+
+        case 'add-item':
+          this.addItem(catId, this.getAddInputValue(catId));
+          break;
+
+        case 'add-category':
+          this.addCategory();
+          break;
+
+        case 'restore-defaults':
+          if(confirm('Заменить текущий список списком по умолчанию? Текущие позиции и отметки будут потеряны.')){
+            Store.restoreDefaults();
+            this.render();
+          }
+          break;
+
+        case 'reset-all':
+          Store.resetAllStates();
+          this.render();
+          break;
+
+        case 'copy-list':
+          this.copyToClipboard(Store.buildMessage(), target);
+          break;
+
+        case 'open-send-sheet':
+          this.openSendSheet();
+          break;
+
+        case 'close-sheet':
+          this.closeSendSheet();
+          break;
+
+        case 'copy-sheet-text':
+          this.copyToClipboard(Store.buildMessage(), null, document.getElementById('statusNote'));
+          break;
+
+        case 'send-tg':
+          this.sendViaWebApp(target);
+          break;
       }
-    });
+    },
 
-    document.getElementById('copyBtn').addEventListener('click', async function(){
-      var note = document.getElementById('statusNote');
-      note.classList.remove('send-error');
-      try{
-        await navigator.clipboard.writeText(msg);
-        note.textContent = 'Скопировано ✓';
-      }catch(e){
-        var area = document.getElementById('msgArea');
-        area.removeAttribute('readonly');
+    /* --- операции над позициями --- */
+    toggleItem: function(catId, itemId){
+      if(this.editMode) return;
+      Store.toggleItemState(catId, itemId);
+      this.render();
+    },
+
+    renameItem: function(catId, itemId){
+      var item = Store._findItem(catId, itemId);
+      if(!item) return;
+      var next = prompt('Название позиции:', item.name);
+      if(next && next.trim()){
+        Store.renameItem(catId, itemId, next);
+        this.render();
+      }
+    },
+
+    getAddInputValue: function(catId){
+      var input = document.querySelector('[data-role="add-input"][data-cat="' + catId + '"]');
+      return input ? input.value : '';
+    },
+
+    addItem: function(catId, rawValue){
+      var val = (rawValue || '').trim();
+      if(!val) return;
+      Store.addItem(catId, val);
+      this.render();
+    },
+
+    addCategory: function(){
+      var name = prompt('Название категории:');
+      if(name && name.trim()){
+        Store.addCategory(name);
+        this.render();
+      }
+    },
+
+    /* --- копирование в буфер --- */
+    copyToClipboard: function(message, btnEl, noteEl){
+      if(!message) return;
+      var restoreBtnText = null;
+      if(btnEl){
+        restoreBtnText = btnEl.textContent;
+      }
+
+      function onSuccess(){
+        if(btnEl){
+          btnEl.textContent = 'Скопировано ✓';
+          setTimeout(function(){ btnEl.textContent = restoreBtnText; }, 1800);
+        }
+        if(noteEl){
+          noteEl.classList.remove('send-error');
+          noteEl.textContent = 'Скопировано ✓';
+        }
+      }
+
+      function onFailure(){
+        if(btnEl){
+          btnEl.textContent = 'Не удалось скопировать';
+          setTimeout(function(){ btnEl.textContent = restoreBtnText; }, 1800);
+        }
+        if(noteEl){
+          noteEl.textContent = 'Не удалось скопировать — выделите текст вручную';
+        }
+      }
+
+      navigator.clipboard.writeText(message).then(onSuccess, function(){
+        var area = document.createElement('textarea');
+        area.value = message;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
         area.focus();
         area.select();
         try{
           document.execCommand('copy');
-          note.textContent = 'Скопировано ✓';
+          onSuccess();
         }catch(e2){
-          note.textContent = 'Не удалось скопировать — выделите текст вручную';
+          onFailure();
         }
-        area.setAttribute('readonly','');
+        document.body.removeChild(area);
+      });
+    },
+
+    /* --- модальный лист отправки --- */
+    openSendSheet: function(){
+      var msg = Store.buildMessage();
+      if(!msg) return;
+      var wrapper = document.createElement('div');
+      wrapper.innerHTML = UI.renderSendSheet(msg);
+      document.body.appendChild(wrapper.firstElementChild);
+    },
+
+    closeSendSheet: function(){
+      var overlay = document.querySelector('[data-role="overlay"]');
+      if(overlay) overlay.remove();
+    },
+
+    /* --- отправка данных нативным способом Telegram Mini Apps --- */
+    sendViaWebApp: function(btnEl){
+      var msg = Store.buildMessage();
+      var note = document.getElementById('statusNote');
+      if(!msg){
+        return;
       }
-    });
-  }
 
-  function applyTelegramTheme(tg){
-    document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light');
-  }
+      if(!window.Telegram || !window.Telegram.WebApp || typeof window.Telegram.WebApp.sendData !== 'function'){
+        if(note){
+          note.classList.add('send-error');
+          note.textContent = 'Отправка доступна только внутри Telegram.';
+        }
+        return;
+      }
 
-  function initTelegram(){
-    if(!window.Telegram || !window.Telegram.WebApp) return;
-    var tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    applyTelegramTheme(tg);
-    if(tg.onEvent){
-      tg.onEvent('themeChanged', function(){ applyTelegramTheme(tg); });
+      btnEl.disabled = true;
+      btnEl.textContent = 'Отправляем…';
+
+      var payload = JSON.stringify({ messageText: msg });
+
+      Store.resetAllStates();
+      window.Telegram.WebApp.sendData(payload);
+      window.Telegram.WebApp.close();
+    },
+
+    /* --- интеграция с Telegram WebApp (тема, инициализация) --- */
+    applyTelegramTheme: function(tg){
+      document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light');
+    },
+
+    initTelegram: function(){
+      if(!window.Telegram || !window.Telegram.WebApp) return;
+      var tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      this.applyTelegramTheme(tg);
+      if(tg.onEvent){
+        tg.onEvent('themeChanged', this.applyTelegramTheme.bind(this, tg));
+      }
     }
-    // Только светлая/тёмная схема из Telegram — сами цвета
-    // из themeParams не берём, чтобы дизайн оставался чёрно-белым.
-  }
+  };
 
-  async function init(){
-    initTelegram();
-    await loadData();
-    render();
-  }
-
-  init();
+  App.init();
 })();
 </script>
 </body>
