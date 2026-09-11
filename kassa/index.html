@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Касса</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,7 +115,6 @@ header {
   padding: 5px 12px;
 }
 
-/* Heroes — два блока рядом */
 .heroes {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -171,7 +170,6 @@ header {
   min-height: 15px;
 }
 
-/* Расходы метрика — тонкая строка */
 .rash-row {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -199,7 +197,6 @@ header {
   letter-spacing: -0.02em;
 }
 
-/* Cards */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -235,7 +232,6 @@ header {
   margin-right: 12px;
 }
 
-/* СБП — слегка приглушён */
 .row-label.dim { color: var(--hint); }
 
 .row-input {
@@ -309,7 +305,29 @@ input::placeholder { color: var(--hint); }
   letter-spacing: -0.02em;
 }
 
-/* Expenses */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.chips:empty { display: none; }
+
+.chip {
+  font-size: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.chip:hover { color: var(--accent); border-color: var(--accent-light); }
+.chip:active { transform: scale(0.96); }
+
 .exp-item {
   display: flex;
   align-items: center;
@@ -362,11 +380,10 @@ input::placeholder { color: var(--hint); }
 
 .add-exp-btn:hover { color: var(--accent); border-color: var(--accent-light); background: var(--accent-dim); }
 
-/* Diff */
 .diff-ok {
   display: flex; align-items: center; gap: 8px;
   background: var(--surface2);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid var(--border2);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
   font-size: 13px; color: var(--text);
@@ -383,7 +400,6 @@ input::placeholder { color: var(--hint); }
   margin-top: 12px; font-weight: 600;
 }
 
-/* Copy */
 .copy-btn {
   width: 100%;
   margin-top: 1.25rem;
@@ -404,6 +420,7 @@ input::placeholder { color: var(--hint); }
 
 .copy-btn:hover { opacity: 0.85; }
 .copy-btn:active { transform: scale(0.98); }
+.copy-btn:disabled { opacity: 0.55; pointer-events: none; }
 
 .copy-btn.outline {
   margin-top: 8px;
@@ -443,7 +460,6 @@ header            { animation-delay: 0.04s; }
     <div class="date-chip" id="date-label"></div>
   </header>
 
-  <!-- Два героя: Итог + В кассе -->
   <div class="heroes">
     <div class="hero primary">
       <div class="hero-label">Итог</div>
@@ -457,40 +473,38 @@ header            { animation-delay: 0.04s; }
     </div>
   </div>
 
-  <!-- Расходы — тонкая строка -->
   <div class="rash-row">
     <span class="rash-label">Расходы</span>
     <span class="rash-val" id="m-rash">—</span>
   </div>
 
-  <!-- Итог (приход) -->
   <div class="card">
     <div class="sec-title">Итог</div>
     <div class="row">
       <span class="row-label">Нал</span>
       <div class="row-input">
-        <input type="number" id="nal" placeholder="0" oninput="calc()">
+        <input type="number" id="nal" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
         <span class="cur">₽</span>
       </div>
     </div>
     <div class="row">
       <span class="row-label">Безнал</span>
       <div class="row-input">
-        <input type="number" id="beznal" placeholder="0" oninput="calc()">
+        <input type="number" id="beznal" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
         <span class="cur">₽</span>
       </div>
     </div>
     <div class="row">
       <span class="row-label">Безнал QR</span>
       <div class="row-input">
-        <input type="number" id="beznal_qr" placeholder="0" oninput="calc()">
+        <input type="number" id="beznal_qr" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
         <span class="cur">₽</span>
       </div>
     </div>
     <div class="row">
       <span class="row-label">QR (СБП)</span>
       <div class="row-input">
-        <input type="number" id="qr" placeholder="0" oninput="calc()">
+        <input type="number" id="qr" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
         <span class="cur">₽</span>
       </div>
     </div>
@@ -500,20 +514,26 @@ header            { animation-delay: 0.04s; }
     </div>
   </div>
 
-  <!-- Расходы -->
   <div class="card">
     <div class="sec-title">Расходы</div>
+    <div class="chips" id="chips"></div>
     <div id="exp-list"></div>
     <button class="add-exp-btn" onclick="addExp()">+ добавить расход</button>
   </div>
 
-  <!-- В кассе -->
   <div class="card">
     <div class="sec-title">В кассе (наличные)</div>
+    <div class="row">
+      <span class="row-label">Инкассация</span>
+      <div class="row-input">
+        <input type="number" id="incass" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
     <div class="row" style="border-bottom:none">
       <span class="row-label">Нал факт</span>
       <div class="row-input">
-        <input type="number" id="fakt_nal" placeholder="0" oninput="calc()">
+        <input type="number" id="fakt_nal" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
         <span class="cur">₽</span>
       </div>
     </div>
@@ -527,7 +547,7 @@ header            { animation-delay: 0.04s; }
     <span id="btn-text">Скопировать отчёт</span>
   </button>
 
-  <button class="copy-btn outline" onclick="sendReport()">
+  <button class="copy-btn outline" id="send-btn" onclick="sendReport()">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
     </svg>
@@ -536,11 +556,22 @@ header            { animation-delay: 0.04s; }
 
 </div>
 <script>
+  /* ==== Настройки ==== */
+  const EXP_CHIPS = ['Вода', 'Уборка']; // быстрые категории расходов
+  const DRAFT_KEY = 'kassa_draft_v1';
+  const FIELD_IDS = ['nal', 'beznal', 'beznal_qr', 'qr', 'incass', 'fakt_nal'];
+
+  // ← ВСТАВЬТЕ СЮДА URL веб-приложения из шага 5
+  // (выглядит как https://script.google.com/macros/s/....../exec)
+  const APPS_SCRIPT_URL = '';
+
   document.getElementById('date-label').textContent =
     new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
 
   let expenses = [{ id: 1, name: '', sum: '' }];
   let nextId = 2;
+  let sending = false;
+  let saveTimer = null;
 
   function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
 
@@ -548,34 +579,114 @@ header            { animation-delay: 0.04s; }
     return (Math.round(n * 100) / 100).toLocaleString('ru-RU', {maximumFractionDigits: 2}) + ' ₽';
   }
 
-  function n(num) {
-    return Math.round(num * 100) / 100;
-  }
-
   function totalExp() {
     return expenses.reduce((s, e) => s + (parseFloat(e.sum) || 0), 0);
   }
 
+  /* ==== Автосохранение черновика ==== */
+  function saveDraft() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          day: new Date().toDateString(),
+          fields: FIELD_IDS.map(id => document.getElementById(id).value),
+          expenses: expenses
+        }));
+      } catch (e) { /* приватный режим и т.п. — молча игнорируем */ }
+    }, 250);
+  }
+
+  function loadDraft() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+    if (!d || d.day !== new Date().toDateString()) {
+      if (d) localStorage.removeItem(DRAFT_KEY);
+      return;
+    }
+    FIELD_IDS.forEach(function (id, i) {
+      if (d.fields && typeof d.fields[i] === 'string') {
+        document.getElementById(id).value = d.fields[i];
+      }
+    });
+    if (Array.isArray(d.expenses) && d.expenses.length) {
+      expenses = d.expenses.map(e => ({
+        id: Number(e.id) || 0,
+        name: String(e.name || ''),
+        sum: String(e.sum || '')
+      }));
+      nextId = Math.max.apply(null, expenses.map(e => e.id)) + 1;
+    }
+  }
+
+  /* ==== Чипы быстрых расходов ==== */
+  function renderChips() {
+    const box = document.getElementById('chips');
+    box.innerHTML = '';
+    EXP_CHIPS.forEach(function (name) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = '+ ' + name;
+      b.addEventListener('click', function () { addExp(name); });
+      box.appendChild(b);
+    });
+  }
+
+  /* ==== Расходы: безопасная отрисовка через DOM ==== */
   function renderExp() {
     const list = document.getElementById('exp-list');
     list.innerHTML = '';
-    expenses.forEach(exp => {
-      const d = document.createElement('div');
-      d.className = 'exp-item';
-      d.innerHTML = `
-        <input class="exp-name" type="text" placeholder="Описание" value="${exp.name}"
-          oninput="updExp(${exp.id},'name',this.value)" style="flex:1;min-width:0">
-        <div class="exp-sum-wrap">
-          <input type="number" placeholder="0" value="${exp.sum}"
-            oninput="updExp(${exp.id},'sum',this.value)">
-          <span class="cur">₽</span>
-        </div>
-        ${expenses.length > 1
-          ? `<button class="del-btn" onclick="delExp(${exp.id})" aria-label="Удалить">×</button>`
-          : ''}
-      `;
-      list.appendChild(d);
+
+    expenses.forEach(function (exp) {
+      const item = document.createElement('div');
+      item.className = 'exp-item';
+      item.dataset.id = exp.id;
+
+      const nameInp = document.createElement('input');
+      nameInp.type = 'text';
+      nameInp.className = 'exp-name';
+      nameInp.placeholder = 'Описание';
+      nameInp.value = exp.name;
+      nameInp.addEventListener('input', function () { updExp(exp.id, 'name', nameInp.value); });
+
+      const sumWrap = document.createElement('div');
+      sumWrap.className = 'exp-sum-wrap';
+
+      const sumInp = document.createElement('input');
+      sumInp.type = 'number';
+      sumInp.placeholder = '0';
+      sumInp.min = '0';
+      sumInp.inputMode = 'decimal';
+      sumInp.value = exp.sum;
+      sumInp.addEventListener('input', function () { updExp(exp.id, 'sum', sumInp.value); });
+
+      const cur = document.createElement('span');
+      cur.className = 'cur';
+      cur.textContent = '₽';
+
+      sumWrap.appendChild(sumInp);
+      sumWrap.appendChild(cur);
+      item.appendChild(nameInp);
+      item.appendChild(sumWrap);
+
+      if (expenses.length > 1) {
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'del-btn';
+        del.setAttribute('aria-label', 'Удалить');
+        del.textContent = '×';
+        del.addEventListener('click', function () { delExp(exp.id); });
+        item.appendChild(del);
+      }
+
+      list.appendChild(item);
     });
+  }
+
+  function focusExpSum(id) {
+    const inp = document.querySelector('.exp-item[data-id="' + id + '"] input[type="number"]');
+    if (inp) inp.focus();
   }
 
   function updExp(id, field, val) {
@@ -584,9 +695,17 @@ header            { animation-delay: 0.04s; }
     calc();
   }
 
-  function addExp() {
-    expenses.push({ id: nextId++, name: '', sum: '' });
+  function addExp(name) {
+    name = name || '';
+    if (name) {
+      const existing = expenses.find(e => e.name === name && String(e.sum) === '');
+      if (existing) { focusExpSum(existing.id); return; }
+    }
+    const exp = { id: nextId++, name: name, sum: '' };
+    expenses.push(exp);
     renderExp();
+    calc();
+    if (name) focusExpSum(exp.id);
   }
 
   function delExp(id) {
@@ -595,86 +714,82 @@ header            { animation-delay: 0.04s; }
     calc();
   }
 
+  /* ==== Расчёты ==== */
   function calc() {
     const nal = v('nal'), beznal = v('beznal'), bq = v('beznal_qr'), qr = v('qr');
     const rash = totalExp();
+    const incass = v('incass');
     const faktNal = v('fakt_nal');
+    const faktRaw = document.getElementById('fakt_nal').value.trim();
 
-    // Итог = нал + безнал + безнал QR + QR (СБП)
     const itog = nal + beznal + bq + qr;
-
-    // В кассе = нал факт (просто что посчитали)
     const kassa = faktNal;
-
-    // Для сверки: ожидаемый нал = нал − расходы
-    const nalOzhid = nal - rash;
+    const nalOzhid = nal - rash - incass;
 
     document.getElementById('itog-val').textContent = fmt(itog);
     document.getElementById('m-itog').textContent = fmt(itog);
     document.getElementById('m-rash').textContent = fmt(rash);
-    document.getElementById('m-kassa').textContent = faktNal > 0 ? fmt(kassa) : '—';
+    document.getElementById('m-kassa').textContent = faktRaw !== '' ? fmt(kassa) : '—';
 
-    // Подпись под итогом
     const itogSub = document.getElementById('itog-sub');
     const parts = [];
-    if (nal > 0) parts.push(`нал ${fmt(nal)}`);
-    if (beznal > 0) parts.push(`безнал ${fmt(beznal)}`);
-    if (bq > 0) parts.push(`QR ${fmt(bq)}`);
-    if (qr > 0) parts.push(`СБП ${fmt(qr)}`);
+    if (nal > 0) parts.push('нал ' + fmt(nal));
+    if (beznal > 0) parts.push('безнал ' + fmt(beznal));
+    if (bq > 0) parts.push('QR ' + fmt(bq));
+    if (qr > 0) parts.push('СБП ' + fmt(qr));
     itogSub.textContent = parts.join(' · ');
 
-    // Подпись под кассой
     const kassaSub = document.getElementById('kassa-sub');
-    if (faktNal > 0 && rash > 0) {
-      kassaSub.textContent = `ожидалось ${fmt(nalOzhid)}`;
-    } else if (faktNal > 0) {
-      kassaSub.textContent = `нал ${fmt(nal)}`;
+    if (faktNal > 0 && nal > 0) {
+      kassaSub.textContent = (rash > 0 || incass > 0)
+        ? 'ожидалось ' + fmt(nalOzhid)
+        : 'нал ' + fmt(nal);
     } else {
       kassaSub.textContent = '';
     }
 
-    // Сверка
     const diff = Math.round((faktNal - nalOzhid) * 100) / 100;
     const db = document.getElementById('diff-block');
 
-    if (faktNal > 0 || nal > 0) {
+    if (nal > 0 && faktRaw !== '') {
       if (Math.abs(diff) < 1) {
-        db.innerHTML = `<div class="diff-ok">✓&nbsp; Касса сходится</div>`;
+        db.innerHTML = '<div class="diff-ok">✓&nbsp; Касса сходится</div>';
       } else {
         const sign = diff > 0
-          ? `Излишек +${fmt(diff)}`
-          : `Недостача ${fmt(Math.abs(diff))}`;
-        db.innerHTML = `<div class="diff-err">!&nbsp; ${sign}</div>`;
+          ? 'Излишек +' + fmt(diff)
+          : 'Недостача ' + fmt(Math.abs(diff));
+        db.innerHTML = '<div class="diff-err">!&nbsp; ' + sign + '</div>';
       }
     } else {
       db.innerHTML = '';
     }
+
+    saveDraft();
   }
 
   function buildReportText() {
     const nal = v('nal'), beznal = v('beznal'), bq = v('beznal_qr'), qr = v('qr');
-    const itog = nal + beznal + bq + qr;
+    const incass = v('incass');
     const faktNal = v('fakt_nal');
+    const itog = nal + beznal + bq + qr;
+
+    let text = 'Итог — ' + Math.round(itog).toLocaleString('ru-RU') + '\n\n';
+    text += 'Нал — ' + Math.round(nal).toLocaleString('ru-RU') + '\n';
+    text += 'Безнал — ' + Math.round(beznal).toLocaleString('ru-RU') + '\n';
+    text += 'Безнал QR — ' + Math.round(bq).toLocaleString('ru-RU') + '\n';
+    text += 'QR — ' + Math.round(qr).toLocaleString('ru-RU');
 
     const rashLines = expenses
       .filter(e => parseFloat(e.sum) > 0)
       .map(e => {
-        const s = Math.round(parseFloat(e.sum) || 0).toLocaleString('ru-RU');
-        return e.name ? `${e.name} — ${s}` : `${s}`;
+        const s = Math.round(parseFloat(e.sum)).toLocaleString('ru-RU');
+        return e.name ? e.name + ' — ' + s : s;
       })
       .join('\n');
 
-    let text = `Итог — ${Math.round(itog).toLocaleString('ru-RU')}\n\n`;
-    text += `Нал — ${Math.round(nal).toLocaleString('ru-RU')}\n`;
-    text += `Безнал — ${Math.round(beznal).toLocaleString('ru-RU')}\n`;
-    text += `Безнал QR — ${Math.round(bq).toLocaleString('ru-RU')}\n`;
-    text += `QR — ${Math.round(qr).toLocaleString('ru-RU')}`;
-
-    if (rashLines) {
-      text += `\n\nРасходы\n${rashLines}`;
-    }
-
-    text += `\n\nВ кассе ${Math.round(faktNal).toLocaleString('ru-RU')}`;
+    if (rashLines) text += '\n\nРасходы\n' + rashLines;
+    if (incass > 0) text += '\n\nИнкассация — ' + Math.round(incass).toLocaleString('ru-RU');
+    text += '\n\nВ кассе ' + Math.round(faktNal).toLocaleString('ru-RU');
     return text;
   }
 
@@ -687,7 +802,6 @@ header            { animation-delay: 0.04s; }
       setTimeout(() => btn.textContent = 'Скопировать отчёт', 2200);
     }
 
-    // Современный способ (Chrome desktop, новые Safari)
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(onCopied).catch(() => fallbackCopy(text, onCopied));
     } else {
@@ -695,38 +809,63 @@ header            { animation-delay: 0.04s; }
     }
   }
 
-  const TELEGRAM_BOT_TOKEN = '';
-  const TELEGRAM_CHAT_ID = '-1002628442313';
-  const TELEGRAM_THREAD_ID = 3;
-
-  async function sendToTelegram(text) {
-    const url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, message_thread_id: TELEGRAM_THREAD_ID, text: text })
-    });
-    const payload = await res.json();
-    if (!payload.ok) throw new Error(payload.description || 'Telegram вернул ошибку');
-    return payload;
-  }
-
+  /* ==== Отправка через Google Apps Script (токен бота живёт в свойствах скрипта) ==== */
   async function sendReport() {
-    const text = buildReportText();
+    if (sending) return;
+
+    if (!APPS_SCRIPT_URL) {
+      alert('Сначала вставьте URL веб-приложения Google в настройку APPS_SCRIPT_URL (строка с комментарием-стрелкой в начале скрипта).');
+      return;
+    }
+
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    if (!tg || !tg.initData) {
+      alert('Отправка доступна внутри Telegram. В браузере пользуйтесь кнопкой «Скопировать отчёт».');
+      return;
+    }
+
+    sending = true;
+    const btn = document.getElementById('send-btn');
     const label = document.getElementById('send-btn-text');
     const original = label.textContent;
+    btn.disabled = true;
     label.textContent = 'Отправляем…';
+
+    const payload = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      initData: tg.initData,
+      nal: v('nal'),
+      beznal: v('beznal'),
+      beznal_qr: v('beznal_qr'),
+      qr: v('qr'),
+      incass: v('incass'),
+      fakt_nal: v('fakt_nal'),
+      expenses: expenses.map(e => ({ name: e.name, sum: parseFloat(e.sum) || 0 }))
+    };
+
     try {
-      await sendToTelegram(text);
+      // text/plain — чтобы браузер не слал preflight-запрос, который Apps Script не умеет обрабатывать
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const answer = await res.json();
+      if (!answer.ok) throw new Error(answer.error || 'сервер вернул ошибку');
+
+      if (tg.HapticFeedback) { try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {} }
       label.textContent = 'Отправлено ✓';
       setTimeout(() => label.textContent = original, 2200);
     } catch (err) {
       label.textContent = original;
-      alert('Не получилось отправить в чат: ' + err.message);
+      alert('Не получилось отправить: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      sending = false;
     }
   }
 
-  // Fallback через textarea — работает на мобильном Safari и Android
   function fallbackCopy(text, cb) {
     const ta = document.createElement('textarea');
     ta.value = text;
@@ -734,7 +873,6 @@ header            { animation-delay: 0.04s; }
     ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
     document.body.appendChild(ta);
 
-    // iOS требует особого выделения
     if (navigator.userAgent.match(/ipad|iphone/i)) {
       const range = document.createRange();
       range.selectNodeContents(ta);
@@ -769,12 +907,13 @@ header            { animation-delay: 0.04s; }
     if(tg.onEvent){
       tg.onEvent('themeChanged', function(){ applyTelegramTheme(tg); });
     }
-    // Только светлая/тёмная схема из Telegram — сами цвета
-    // из themeParams не берём, чтобы дизайн оставался чёрно-белым.
   }
 
   initTelegram();
+  loadDraft();
+  renderChips();
   renderExp();
+  calc();
 </script>
 </body>
 </html>
