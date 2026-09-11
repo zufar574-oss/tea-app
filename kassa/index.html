@@ -549,21 +549,20 @@ header            { animation-delay: 0.04s; }
 
   <button class="copy-btn outline" id="send-btn" onclick="sendReport()">
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/>
     </svg>
-    <span id="send-btn-text">Отправить в чат</span>
+    <span id="send-btn-text">Сохранить в таблицу</span>
   </button>
 
 </div>
 <script>
-  /* ==== Настройки ==== */
+  /* ==================== НАСТРОЙКИ ==================== */
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaQNxuv_u_dQjKUsWzwNRDTLKX1pNMRj9yUVohqm5NnNDVUXiV2oTLR7groNyhOvKX/exec'; // ← СЮДА ВСТАВЬТЕ URL из шага 6 (вида https://script.google.com/macros/s/…/exec)
+  const APP_KEY = 'kassa_9tX4mQ7vLp2w'; // ключ доступа — совпадает с SECRET_KEY в Apps Script
   const EXP_CHIPS = ['Вода', 'Уборка']; // быстрые категории расходов
   const DRAFT_KEY = 'kassa_draft_v1';
   const FIELD_IDS = ['nal', 'beznal', 'beznal_qr', 'qr', 'incass', 'fakt_nal'];
-
-  // ← ВСТАВЬТЕ СЮДА URL веб-приложения из шага 5
-  // (выглядит как https://script.google.com/macros/s/....../exec)
-  const APPS_SCRIPT_URL = '';
+  /* =================================================== */
 
   document.getElementById('date-label').textContent =
     new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
@@ -809,19 +808,18 @@ header            { animation-delay: 0.04s; }
     }
   }
 
-  /* ==== Отправка через Google Apps Script (токен бота живёт в свойствах скрипта) ==== */
+  /* ==== Сохранение в Google Таблицу (бот подключается позже — на стороне скрипта) ==== */
   async function sendReport() {
     if (sending) return;
 
     if (!APPS_SCRIPT_URL) {
-      alert('Сначала вставьте URL веб-приложения Google в настройку APPS_SCRIPT_URL (строка с комментарием-стрелкой в начале скрипта).');
+      alert('Сначала вставьте URL веб-приложения Google в настройку APPS_SCRIPT_URL (строка с пометкой-стрелкой в начале скрипта).');
       return;
     }
 
     const tg = window.Telegram && window.Telegram.WebApp;
-
     if (!tg || !tg.initData) {
-      alert('Отправка доступна внутри Telegram. В браузере пользуйтесь кнопкой «Скопировать отчёт».');
+      alert('Сохранение доступно внутри Telegram. В браузере пользуйтесь кнопкой «Скопировать отчёт».');
       return;
     }
 
@@ -830,10 +828,11 @@ header            { animation-delay: 0.04s; }
     const label = document.getElementById('send-btn-text');
     const original = label.textContent;
     btn.disabled = true;
-    label.textContent = 'Отправляем…';
+    label.textContent = 'Сохраняем…';
 
     const payload = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      key: APP_KEY,
       initData: tg.initData,
       nal: v('nal'),
       beznal: v('beznal'),
@@ -853,13 +852,14 @@ header            { animation-delay: 0.04s; }
       });
       const answer = await res.json();
       if (!answer.ok) throw new Error(answer.error || 'сервер вернул ошибку');
+      if (answer.warn) alert(answer.warn);
 
       if (tg.HapticFeedback) { try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {} }
-      label.textContent = 'Отправлено ✓';
+      label.textContent = 'Сохранено ✓';
       setTimeout(() => label.textContent = original, 2200);
     } catch (err) {
       label.textContent = original;
-      alert('Не получилось отправить: ' + err.message);
+      alert('Не получилось сохранить: ' + err.message);
     } finally {
       btn.disabled = false;
       sending = false;
