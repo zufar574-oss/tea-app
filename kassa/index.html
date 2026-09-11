@@ -437,6 +437,21 @@ input::placeholder { color: var(--hint); }
   flex-shrink: 0;
 }
 
+.clear-btn {
+  display: block;
+  margin: 1.5rem auto 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--hint);
+  letter-spacing: 0.04em;
+  padding: 8px 16px;
+  transition: color 0.15s;
+}
+.clear-btn:hover { color: var(--muted); }
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -554,10 +569,12 @@ header            { animation-delay: 0.04s; }
     <span id="send-btn-text">Сохранить в таблицу</span>
   </button>
 
+  <button class="clear-btn" onclick="clearAll()">очистить форму</button>
+
 </div>
 <script>
   /* ==================== НАСТРОЙКИ ==================== */
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaQNxuv_u_dQjKUsWzwNRDTLKX1pNMRj9yUVohqm5NnNDVUXiV2oTLR7groNyhOvKX/exec'; // ← СЮДА ВСТАВЬТЕ URL из шага 6 (вида https://script.google.com/macros/s/…/exec)
+  const APPS_SCRIPT_URL = ''; // ← СЮДА ВСТАВЬТЕ URL веб-приложения (тот же, что работает сейчас)
   const APP_KEY = 'kassa_9tX4mQ7vLp2w'; // ключ доступа — совпадает с SECRET_KEY в Apps Script
   const EXP_CHIPS = ['Вода', 'Уборка']; // быстрые категории расходов
   const DRAFT_KEY = 'kassa_draft_v1';
@@ -863,6 +880,29 @@ header            { animation-delay: 0.04s; }
     } finally {
       btn.disabled = false;
       sending = false;
+    }
+  }
+
+  /* ==== Очистка формы ==== */
+  function clearAll() {
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    const doClear = function () {
+      FIELD_IDS.forEach(function (id) { document.getElementById(id).value = ''; });
+      expenses = [{ id: 1, name: '', sum: '' }];
+      nextId = 2;
+      try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+      renderExp();
+      calc();
+      if (tg && tg.HapticFeedback) { try { tg.HapticFeedback.impactOccurred('medium'); } catch (e) {} }
+    };
+
+    const msg = 'Очистить форму? Несохранённые данные будут потеряны.';
+
+    if (tg && tg.showConfirm) {
+      tg.showConfirm(msg, function (ok) { if (ok) doClear(); });
+    } else if (confirm(msg)) {
+      doClear();
     }
   }
 
