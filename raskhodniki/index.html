@@ -2,954 +2,918 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Расходники</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Касса</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0f0f0;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111111;
+  --muted: #6e6e6e;
+  --hint: #9a9a9a;
+  --accent: #111111;
+  --accent-contrast: #ffffff;
+  --accent-light: #444444;
+  --accent-dim: rgba(0,0,0,0.06);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+@media (prefers-color-scheme: dark){
   :root{
-    --bg:#FFFFFF;
-    --surface:#FFFFFF;
-    --surface-muted:#F0F0F0;
-    --text:#111111;
-    --text-muted:#6E6E6E;
-    --accent:#111111;
-    --accent-contrast:#FFFFFF;
-    --border:#DDDDDD;
-    --radius:14px;
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #262626;
+    --border: rgba(255,255,255,0.09);
+    --border2: rgba(255,255,255,0.16);
+    --text: #f2f2f2;
+    --muted: #9a9a9a;
+    --hint: #7a7a7a;
+    --accent: #f2f2f2;
+    --accent-contrast: #0f0f0f;
+    --accent-light: #bbbbbb;
+    --accent-dim: rgba(255,255,255,0.08);
   }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg:#0F0F0F;
-      --surface:#1A1A1A;
-      --surface-muted:#262626;
-      --text:#F2F2F2;
-      --text-muted:#9A9A9A;
-      --accent:#F2F2F2;
-      --accent-contrast:#0F0F0F;
-      --border:#333333;
-    }
-  }
-  html[data-theme="light"]{
-    --bg:#FFFFFF;
-    --surface:#FFFFFF;
-    --surface-muted:#F0F0F0;
-    --text:#111111;
-    --text-muted:#6E6E6E;
-    --accent:#111111;
-    --accent-contrast:#FFFFFF;
-    --border:#DDDDDD;
-  }
-  html[data-theme="dark"]{
-    --bg:#0F0F0F;
-    --surface:#1A1A1A;
-    --surface-muted:#262626;
-    --text:#F2F2F2;
-    --text-muted:#9A9A9A;
-    --accent:#F2F2;
-    --accent-contrast:#0F0F0F;
-    --border:#333333;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
-    -webkit-tap-highlight-color:transparent;
-    min-height:100vh;
-  }
-  .app{
-    max-width:480px;
-    margin:0 auto;
-    min-height:100vh;
-    background:var(--bg);
-    display:flex;
-    flex-direction:column;
-    padding-bottom:96px;
-  }
-  header{
-    padding:22px 18px 14px;
-    position:sticky;
-    top:0;
-    background:var(--bg);
-    z-index:5;
-    border-bottom:1px solid var(--border);
-  }
-  .header-row{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
-  }
-  h1{
-    font-family:'IBM Plex Sans',sans-serif;
-    font-weight:700;
-    font-size:21px;
-    letter-spacing:-0.01em;
-    line-height:1.15;
-    margin:0 0 3px;
-  }
-  .subtitle{
-    font-size:13px;
-    color:var(--text-muted);
-    margin:0;
-  }
-  .edit-toggle{
-    flex:0 0 auto;
-    width:38px;
-    height:38px;
-    border-radius:50%;
-    border:1px solid var(--border);
-    background:var(--surface);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    color:var(--text-muted);
-    font-size:16px;
-  }
-  .edit-toggle.active{
-    background:var(--accent);
-    border-color:var(--accent);
-    color:var(--accent-contrast);
-  }
-  .summary{
-    display:flex;
-    gap:8px;
-    margin-top:12px;
-    flex-wrap:wrap;
-  }
-  .pill{
-    font-size:12.5px;
-    pading:5px 11px;
-    border-radius:100px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    color:var(--text-muted);
-  }
-  .pill.low{background:var(--surface-muted);color:var(--text);border-color:transparent;}
-  .pill.out{background:var(--accent);color:var(--accent-contrast);border-color:transparent;}
+}
 
-  main{padding:6px 14px 0;flex:1;}
-  .category{margin-top:22px;}
-  .category-label{
-    font-family:'IBM Plex Sans',sans-serif;
-    font-weight:600;
-    text-transform:uppercase;
-    letter-spacing:0.06em;
-    font-size:12px;
-    color:var(--text-muted);
-    margin:0 4px 8px;
-  }
-  .items{
-    background:var(--surface);
-    border-radius:var(--radius);
-    border:1px solid var(--border);
-    overflow:hidden;
-  }
-  .item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:13px 14px;
-    border-bottom:1px solid var(--border);
-    cursor:pointer;
-    user-select:none;
-    transition:background .15s ease;
-  }
-  .item:last-child{border-bottom:none;}
-  .item[data-state="low"]{background:var(--surface-muted);}
-  .item[data-state="out"]{background:var(--accent);}
-  .item-name{
-    font-size:15px;
-    line-height:1.35;
-    flex:1;
-    padding-right:10px;
-  }
-  .item[data-state="low"] .item-name,
-  .item[data-state="out"] .item-name{font-weight:600;}
-  .item[data-state="out"] .item-name{color:var(--accent-contrast);}
-  .state-chip{
-    font-size:12px;
-    color:var(--text-muted);
-    flex:0 0 auto;
-    min-width:30px;
-    text-align:right;
-  }
-  .item[data-state="low"] .state-chip{color:var(--text);}
-  .item[data-state="out"] .state-chip{color:var(--accent-contrast);}
-  .item-delete{
-    margin-left:10px;
-    width:26px;
-    height:26px;
-    border-radius:50%;
-    border:none;
-    background:var(--accent);
-    color:var(--accent-contrast);
-    font-size:14px;
-    line-height:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    flex:0 0 auto;
-  }
-  .add-row{
-    display:flex;
-    gap:8px;
-    padding:10px 14px;
-    background:var(--surface-muted);
-  }
-  .add-row input{
-    flex:1;
-    border:1px solid var(--border);
-    border-radius:9px;
-    padding:8px 10px;
-    font-size:14px;
-    font-family:inherit;
-    background:var(--surface);
-    color:var(--text);
-  }
-  .add-row button{
-    border:none;
-    background:var(--accent);
-    color:var(--accent-contrast);
-    border-radius:9px;
-    padding:0 14px;
-    font-size:13px;
-    font-weight:600;
-    cursor:pointer;
-  }
-  .add-category{
-    margin-top:18px;
-    width:100%;
-    padding:12px;
-    border-radius:var(--radius);
-    border:1px dashed var(--border);
-    background:transparent;
-    color:var(--text-muted);
-    font-family:inherit;
-    font-size:14px;
-    cursor:pointer;
-  }
-  .restore-defaults{
-    display:block;
-    margin:22px auto 4px;
-    background:none;
-    border:none;
-    color:var(--text-muted);
-    font-size:13px;
-    text-decoration:underline;
-    cursor:pointer;
-  }
+html[data-theme="light"]{
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0f0f0;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111111;
+  --muted: #6e6e6e;
+  --hint: #9a9a9a;
+  --accent: #111111;
+  --accent-contrast: #ffffff;
+  --accent-light: #444444;
+  --accent-dim: rgba(0,0,0,0.06);
+}
 
-  .actionbar{
-    position:fixed;
-    bottom:0;left:0;right:0;
-    display:flex;
-    justify-content:center;
-    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
-    background:linear-gradient(to top, var(--bg) 60%, transparent);
-  }
-  .actionbar-inner{
-    max-width:480px;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .actionbar-row{
-    display:flex;
-    gap:10px;
-  }
-  .btn{
-    flex:1;
-    padding:13px;
-    border-radius:12px;
-    border:none;
-    font-family:inherit;
-    font-size:14.5px;
-    font-weight:600;
-    cursor:pointer;
-  }
-  .btn-secondary{
-    background:var(--surface);
-    border:1px solid var(--border);
-    color:var(--text);
-  }
-  .btn-primary{
-    background:var(--accent);
-    color:var(--accent-contrast);
-  }
-  .btn-primary:disabled{
-    background:var(--surface-muted);
-    color:var(--text-muted);
-    cursor:default;
-  }
-  .btn-secondary:disabled{
-    color:var(--text-muted);
-    cursor:default;
-  }
-  .btn:focus-visible, .edit-toggle:focus-visible, .item:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:2px;
-  }
+html[data-theme="dark"]{
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #262626;
+  --border: rgba(255,255,255,0.09);
+  --border2: rgba(255,255,255,0.16);
+  --text: #f2f2f2;
+  --muted: #9a9a9a;
+  --hint: #7a7a7a;
+  --accent: #f2f2f2;
+  --accent-contrast: #0f0f0f;
+  --accent-light: #bbbbbb;
+  --accent-dim: rgba(255,255,255,0.08);
+}
 
-  .overlay{
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.5);
-    display:flex;
-    align-items:flex-end;
-    z-index:20;
-  }
-  .sheet{
-    background:var(--surface);
-    width:100%;
-    max-width:480px;
-    margin:0 auto;
-    border-radius:20px 20px 0 0;
-    padding:20px 18px calc(20px + env(safe-area-inset-bottom));
-  }
-  .sheet h2{
-    font-family:'IBM Plex Sans',sans-serif;
-    font-weight:700;
-    font-size:17px;
-    margin:0 0 12px;
-  }
-  .sheet textarea{
-    width:100%;
-    min-height:160px;
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:12px;
-    font-family:inherit;
-    font-size:14px;
-    color:var(--text);
-    background:var(--surface-muted);
-    resize:vertical;
-    margin-bottom:14px;
-  }
-  .sheet-actions{display:flex;flex-direction:column;gap:9px;}
-  .sheet-actions a, .sheet-actions button{text-decoration:none;text-align:center;}
-  .copied-note{
-    font-size:12.5px;
-    color:var(--accent);
-    text-align:center;
-    margin:8px 0 0;
-    min-height:16px;
-  }
-  .copied-note.send-error{
-    color:var(--text);
-    font-weight:700;
-  }
-  .loading, .empty{
-    text-align:center;
-    color:var(--text-muted);
-    font-size:14px;
-    padding:60px 20px;
-  }
-  @media (prefers-reduced-motion: reduce){
-    *{transition:none !important;}
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 5rem;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.date-chip {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 12px;
+}
+
+.heroes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero.primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-light), transparent 70%);
+}
+
+.hero-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--hint);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.hero-val {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.hero-val.secondary {
+  color: var(--text);
+}
+
+.hero-sub {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--hint);
+  font-weight: 300;
+  line-height: 1.4;
+  min-height: 15px;
+}
+
+.rash-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.rash-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hint);
+  font-weight: 500;
+}
+
+.rash-val {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: -0.02em;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.sec-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--hint);
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-of-type { border-bottom: none; }
+
+.row-label {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 300;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+
+.row-label.dim { color: var(--hint); }
+
+.row-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+input[type="number"] {
+  width: 118px;
+  text-align: right;
+  font-size: 15px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 300;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  outline: none;
+  letter-spacing: -0.02em;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus { border-color: var(--accent); }
+
+input[type="text"] {
+  font-size: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input[type="text"]:focus { border-color: var(--accent); }
+input::placeholder { color: var(--hint); }
+
+.cur { font-size: 12px; color: var(--hint); }
+
+.total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border2);
+}
+
+.total-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+.total-val {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.chips:empty { display: none; }
+
+.chip {
+  font-size: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.chip:hover { color: var(--accent); border-color: var(--accent-light); }
+.chip:active { transform: scale(0.96); }
+
+.exp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.exp-item:last-of-type { border-bottom: none; }
+.exp-name { flex: 1; min-width: 0; }
+
+.exp-sum-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.exp-sum-wrap input { width: 96px; }
+
+.del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--hint);
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  font-size: 17px; line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.del-btn:hover { color: var(--accent-contrast); background: var(--accent); }
+
+.add-exp-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  font-size: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--hint);
+  background: none;
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.add-exp-btn:hover { color: var(--accent); border-color: var(--accent-light); background: var(--accent-dim); }
+
+.diff-ok {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px; color: var(--text);
+  margin-top: 12px; font-weight: 500;
+}
+
+.diff-err {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px; color: var(--accent-contrast);
+  margin-top: 12px; font-weight: 600;
+}
+
+.copy-btn {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 16px;
+  font-size: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.15s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+
+.copy-btn:hover { opacity: 0.85; }
+.copy-btn:active { transform: scale(0.98); }
+.copy-btn:disabled { opacity: 0.55; pointer-events: none; }
+
+.copy-btn.outline {
+  margin-top: 8px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border2);
+}
+.copy-btn.outline:hover { background: var(--accent-dim); opacity: 1; }
+
+.copy-btn svg {
+  width: 15px; height: 15px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.app > * { animation: fadeUp 0.4s cubic-bezier(.16,1,.3,1) both; }
+header            { animation-delay: 0.04s; }
+.heroes           { animation-delay: 0.08s; }
+.rash-row         { animation-delay: 0.11s; }
+.card:nth-child(4){ animation-delay: 0.14s; }
+.card:nth-child(5){ animation-delay: 0.16s; }
+.card:nth-child(6){ animation-delay: 0.18s; }
+.copy-btn         { animation-delay: 0.21s; }
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <div class="loading" id="loading">Загружаем список…</div>
+<div class="app">
+
+  <header>
+    <div class="logo">Касса</div>
+    <div class="date-chip" id="date-label"></div>
+  </header>
+
+  <div class="heroes">
+    <div class="hero primary">
+      <div class="hero-label">Итог</div>
+      <div class="hero-val" id="m-itog">—</div>
+      <div class="hero-sub" id="itog-sub"></div>
+    </div>
+    <div class="hero">
+      <div class="hero-label">В кассе</div>
+      <div class="hero-val secondary" id="m-kassa">—</div>
+      <div class="hero-sub" id="kassa-sub"></div>
+    </div>
+  </div>
+
+  <div class="rash-row">
+    <span class="rash-label">Расходы</span>
+    <span class="rash-val" id="m-rash">—</span>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">Итог</div>
+    <div class="row">
+      <span class="row-label">Нал</span>
+      <div class="row-input">
+        <input type="number" id="nal" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
+    <div class="row">
+      <span class="row-label">Безнал</span>
+      <div class="row-input">
+        <input type="number" id="beznal" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
+    <div class="row">
+      <span class="row-label">Безнал QR</span>
+      <div class="row-input">
+        <input type="number" id="beznal_qr" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
+    <div class="row">
+      <span class="row-label">QR (СБП)</span>
+      <div class="row-input">
+        <input type="number" id="qr" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
+    <div class="total-row">
+      <span class="total-label">Итого</span>
+      <span class="total-val" id="itog-val">0 ₽</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">Расходы</div>
+    <div class="chips" id="chips"></div>
+    <div id="exp-list"></div>
+    <button class="add-exp-btn" onclick="addExp()">+ добавить расход</button>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">В кассе (наличные)</div>
+    <div class="row">
+      <span class="row-label">Инкассация</span>
+      <div class="row-input">
+        <input type="number" id="incass" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
+    <div class="row" style="border-bottom:none">
+      <span class="row-label">Нал факт</span>
+      <div class="row-input">
+        <input type="number" id="fakt_nal" placeholder="0" min="0" inputmode="decimal" oninput="calc()">
+        <span class="cur">₽</span>
+      </div>
+    </div>
+    <div id="diff-block"></div>
+  </div>
+
+  <button class="copy-btn" onclick="copyReport()">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+    <span id="btn-text">Скопировать отчёт</span>
+  </button>
+
+  <button class="copy-btn outline" id="send-btn" onclick="sendReport()">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/>
+    </svg>
+    <span id="send-btn-text">Сохранить в таблицу</span>
+  </button>
+
 </div>
-
 <script>
-(function(){
-  'use strict';
+  /* ==================== НАСТРОЙКИ ==================== */
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaQNxuv_u_dQjKUsWzwNRDTLKX1pNMRj9yUVohqm5NnNDVUXiV2oTLR7groNyhOvKX/exec'; // ← СЮДА ВСТАВЬТЕ URL из шага 6 (вида https://script.google.com/macros/s/…/exec)
+  const APP_KEY = 'kassa_9tX4mQ7vLp2w'; // ключ доступа — совпадает с SECRET_KEY в Apps Script
+  const EXP_CHIPS = ['Вода', 'Уборка']; // быстрые категории расходов
+  const DRAFT_KEY = 'kassa_draft_v1';
+  const FIELD_IDS = ['nal', 'beznal', 'beznal_qr', 'qr', 'incass', 'fakt_nal'];
+  /* =================================================== */
 
-  /* =========================================================
-     CONFIG — все константы и настройки приложения в одном месте
-     ========================================================= */
-  var Config = {
-    STORAGE_KEY: 'raskhodniki-data-v1',
+  document.getElementById('date-label').textContent =
+    new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
 
-    STATE_ORDER: ['ok', 'low', 'out'],
-    STATE_LABEL: { ok: '', low: 'мало', out: 'нет' },
+  let expenses = [{ id: 1, name: '', sum: '' }];
+  let nextId = 2;
+  let sending = false;
+  let saveTimer = null;
 
-    DEFAULT_DATA: {
-      categories: [
-        { id:'c1', name:'Уборка и гигиена', items:[
-          {id:'i1', name:'Тряпки для чабаней', state:'ok'},
-          {id:'i2', name:'Губки для мытья посуды', state:'ok'},
-          {id:'i3', name:'Мусорные мешки', state:'ok'},
-          {id:'i4', name:'Бумажные полотенца', state:'ok'},
-          {id:'i5', name:'Туалетная бумага', state:'ok'}
-        ]},
-        { id:'c2', name:'Печать и касса', items:[
-          {id:'i6', name:'Наклейки для принтера (70x50)', state:'ok'},
-          {id:'i7', name:'Чеки для терминала', state:'ok'},
-          {id:'i8', name:'Чеки для кассы', state:'ok'},
-          {id:'i9', name:'Риббон', state:'ok'}
-        ]},
-        { id:'c3', name:'Упаковка', items:[
-          {id:'i10', name:'Конверты для блинов прозрачные (35х20)', state:'ok'},
-          {id:'i11', name:'Конверты для блинов', state:'ok'},
-          {id:'i12', name:'Пакеты для банок (29.5х20)', state:'ok'},
-          {id:'i13', name:'Крафтовые пакеты маленькие с ручками (21,5х24,5)', state:'ok'},
-          {id:'i14', name:'Крафтовые пакеты большие с ручками', state:'ok'},
-          {id:'i15', name:'Крафтовые пакеты маленькие', state:'ok'},
-          {id:'i16', name:'Зип пакеты', state:'ok'},
-          {id:'i17', name:'Зип пакет чёрный (12x8)', state:'ok'},
-          {id:'i18', name:'Зип пакет белый (12x8)', state:'ok'}
-        ]},
-        { id:'c4', name:'Посуда и подача', items:[
-          {id:'i19', name:'Капхолдеры', state:'ok'},
-          {id:'i20', name:'Сито для стаканов', state:'ok'},
-          {id:'i21', name:'Стаканы (для трав)', state:'ok'},
-          {id:'i22', name:'Стаканы (чай с собой)', state:'ok'},
-          {id:'i23', name:'Крышки (чай с собой)', state:'ok'}
-        ]},
-        { id:'c5', name:'Прочее', items:[
-          {id:'i24', name:'Лампочки', state:'ok'}
-        ]}
-      ]
+  function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+  function fmt(n) {
+    return (Math.round(n * 100) / 100).toLocaleString('ru-RU', {maximumFractionDigits: 2}) + ' ₽';
+  }
+
+  function totalExp() {
+    return expenses.reduce((s, e) => s + (parseFloat(e.sum) || 0), 0);
+  }
+
+  /* ==== Автосохранение черновика ==== */
+  function saveDraft() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          day: new Date().toDateString(),
+          fields: FIELD_IDS.map(id => document.getElementById(id).value),
+          expenses: expenses
+        }));
+      } catch (e) { /* приватный режим и т.п. — молча игнорируем */ }
+    }, 250);
+  }
+
+  function loadDraft() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+    if (!d || d.day !== new Date().toDateString()) {
+      if (d) localStorage.removeItem(DRAFT_KEY);
+      return;
     }
-  };
-
-  /* =========================================================
-     STORE (МОДЕЛЬ) — вся работа с данными и localStorage.
-     Ничего не знает про DOM/HTML.
-     ========================================================= */
-  var Store = {
-    data: null,
-
-    /* --- утилиты --- */
-    _uid: function(prefix){
-      return prefix + Math.random().toString(36).slice(2, 9);
-    },
-    _clone: function(obj){
-      return JSON.parse(JSON.stringify(obj));
-    },
-    _findCategory: function(catId){
-      return this.data.categories.find(function(c){ return c.id === catId; });
-    },
-    _findItem: function(catId, itemId){
-      var cat = this._findCategory(catId);
-      return cat ? cat.items.find(function(i){ return i.id === itemId; }) : null;
-    },
-    _cycleState: function(current){
-      var idx = Config.STATE_ORDER.indexOf(current);
-      return Config.STATE_ORDER[(idx + 1) % Config.STATE_ORDER.length];
-    },
-    _todayStr: function(){
-      var d = new Date();
-      var dd = String(d.getDate()).padStart(2, '0');
-      var mm = String(d.getMonth() + 1).padStart(2, '0');
-      return dd + '.' + mm + '.' + d.getFullYear();
-    },
-
-    /* --- персистентность --- */
-    load: function(){
-      try{
-        var raw = localStorage.getItem(Config.STORAGE_KEY);
-        if(raw){
-          this.data = JSON.parse(raw);
-          return;
-        }
-      }catch(e){
-        // хранилище недоступно или пусто — используем данные по умолчанию
+    FIELD_IDS.forEach(function (id, i) {
+      if (d.fields && typeof d.fields[i] === 'string') {
+        document.getElementById(id).value = d.fields[i];
       }
-      this.data = this._clone(Config.DEFAULT_DATA);
-      this.save();
-    },
-    save: function(){
-      try{
-        localStorage.setItem(Config.STORAGE_KEY, JSON.stringify(this.data));
-      }catch(e){
-        console.error('Не удалось сохранить список', e);
-      }
-    },
-    restoreDefaults: function(){
-      this.data = this._clone(Config.DEFAULT_DATA);
-      this.save();
-    },
-
-    /* --- мутации состояния позиций --- */
-    toggleItemState: function(catId, itemId){
-      var item = this._findItem(catId, itemId);
-      if(!item) return;
-      item.state = this._cycleState(item.state);
-      this.save();
-    },
-    resetAllStates: function(){
-      this.data.categories.forEach(function(cat){
-        cat.items.forEach(function(it){ it.state = 'ok'; });
-      });
-      this.save();
-    },
-
-    /* --- CRUD позиций --- */
-    addItem: function(catId, name){
-      var cat = this._findCategory(catId);
-      if(!cat || !name.trim()) return;
-      cat.items.push({ id: this._uid('i'), name: name.trim(), state: 'ok' });
-      this.save();
-    },
-    deleteItem: function(catId, itemId){
-      var cat = this._findCategory(catId);
-      if(!cat) return;
-      cat.items = cat.items.filter(function(i){ return i.id !== itemId; });
-      this.save();
-    },
-    renameItem: function(catId, itemId, newName){
-      var item = this._findItem(catId, itemId);
-      if(!item || !newName.trim()) return;
-      item.name = newName.trim();
-      this.save();
-    },
-
-    /* --- CRUD категорий --- */
-    addCategory: function(name){
-      if(!name.trim()) return;
-      this.data.categories.push({ id: this._uid('c'), name: name.trim(), items: [] });
-      this.save();
-    },
-
-    /* --- агрегаты --- */
-    counts: function(){
-      var low = 0, out = 0;
-      this.data.categories.forEach(function(cat){
-        cat.items.forEach(function(it){
-          if(it.state === 'low') low++;
-          if(it.state === 'out') out++;
-        });
-      });
-      return { low: low, out: out };
-    },
-
-    /* --- сборка финального текста заявки --- */
-    buildMessage: function(){
-      var out = [], low = [];
-      this.data.categories.forEach(function(cat){
-        cat.items.forEach(function(it){
-          if(it.state === 'out') out.push(it.name);
-          else if(it.state === 'low') low.push(it.name);
-        });
-      });
-      if(!out.length && !low.length) return null;
-
-      var lines = ['Расходники на закупку (' + this._todayStr() + '):', ''];
-      if(out.length){
-        lines.push('Закончилось:');
-        out.forEach(function(n){ lines.push('- ' + n); });
-        lines.push('');
-      }
-      if(low.length){
-        lines.push('Мало, есть остаток:');
-        low.forEach(function(n){ lines.push('- ' + n); });
-      }
-      return lines.join('\n').trim();
+    });
+    if (Array.isArray(d.expenses) && d.expenses.length) {
+      expenses = d.expenses.map(e => ({
+        id: Number(e.id) || 0,
+        name: String(e.name || ''),
+        sum: String(e.sum || '')
+      }));
+      nextId = Math.max.apply(null, expenses.map(e => e.id)) + 1;
     }
-  };
+  }
 
-  /* =========================================================
-     UI (ПРЕДСТАВЛЕНИЕ) — чистые функции: данные -> HTML-строка.
-     Никаких побочных эффектов, никакой работы с localStorage.
-     ========================================================= */
-  var UI = {
-    escapeHtml: function(s){
-      var d = document.createElement('div');
-      d.textContent = s;
-      return d.innerHTML;
-    },
+  /* ==== Чипы быстрых расходов ==== */
+  function renderChips() {
+    const box = document.getElementById('chips');
+    box.innerHTML = '';
+    EXP_CHIPS.forEach(function (name) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = '+ ' + name;
+      b.addEventListener('click', function () { addExp(name); });
+      box.appendChild(b);
+    });
+  }
 
-    renderHeader: function(counts, editMode){
-      var summary;
-      if(counts.out || counts.low){
-        summary =
-          (counts.out ? '<span class="pill out">закончилось: ' + counts.out + '</span>' : '') +
-          (counts.low ? '<span class="pill low">мало: ' + counts.low + '</span>' : '');
-      }else{
-        summary = '<span class="pill">пока всё в порядке</span>';
+  /* ==== Расходы: безопасная отрисовка через DOM ==== */
+  function renderExp() {
+    const list = document.getElementById('exp-list');
+    list.innerHTML = '';
+
+    expenses.forEach(function (exp) {
+      const item = document.createElement('div');
+      item.className = 'exp-item';
+      item.dataset.id = exp.id;
+
+      const nameInp = document.createElement('input');
+      nameInp.type = 'text';
+      nameInp.className = 'exp-name';
+      nameInp.placeholder = 'Описание';
+      nameInp.value = exp.name;
+      nameInp.addEventListener('input', function () { updExp(exp.id, 'name', nameInp.value); });
+
+      const sumWrap = document.createElement('div');
+      sumWrap.className = 'exp-sum-wrap';
+
+      const sumInp = document.createElement('input');
+      sumInp.type = 'number';
+      sumInp.placeholder = '0';
+      sumInp.min = '0';
+      sumInp.inputMode = 'decimal';
+      sumInp.value = exp.sum;
+      sumInp.addEventListener('input', function () { updExp(exp.id, 'sum', sumInp.value); });
+
+      const cur = document.createElement('span');
+      cur.className = 'cur';
+      cur.textContent = '₽';
+
+      sumWrap.appendChild(sumInp);
+      sumWrap.appendChild(cur);
+      item.appendChild(nameInp);
+      item.appendChild(sumWrap);
+
+      if (expenses.length > 1) {
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'del-btn';
+        del.setAttribute('aria-label', 'Удалить');
+        del.textContent = '×';
+        del.addEventListener('click', function () { delExp(exp.id); });
+        item.appendChild(del);
       }
-      return (
-        '<header>' +
-          '<div class="header-row">' +
-            '<div><h1>Расходники</h1><p class="subtitle">еженедельная проверка</p></div>' +
-            '<button class="edit-toggle' + (editMode ? ' active' : '') + '" data-action="toggle-edit" aria-label="Редактировать список">' + (editMode ? '✓' : '✎') + '</button>' +
-          '</div>' +
-          '<div class="summary">' + summary + '</div>' +
-        '</header>'
-      );
-    },
 
-    renderItem: function(cat, item, editMode){
-      var self = this;
-      var body = editMode
-        ? (
-            '<span class="item-name" data-action="rename-item" data-cat="' + cat.id + '" data-item="' + item.id + '">' + self.escapeHtml(item.name) + '</span>' +
-            '<button class="item-delete" data-action="delete-item" data-cat="' + cat.id + '" data-item="' + item.id + '" aria-label="Удалить">×</button>'
-          )
-        : (
-            '<span class="item-name">' + self.escapeHtml(item.name) + '</span>' +
-            '<span class="state-chip">' + Config.STATE_LABEL[item.state] + '</span>'
-          );
+      list.appendChild(item);
+    });
+  }
 
-      return (
-        '<div class="item" tabindex="0" data-state="' + item.state + '" ' +
-             (editMode ? '' : 'data-action="toggle-item" ') +
-             'data-cat="' + cat.id + '" data-item="' + item.id + '">' +
-          body +
-        '</div>'
-      );
-    },
+  function focusExpSum(id) {
+    const inp = document.querySelector('.exp-item[data-id="' + id + '"] input[type="number"]');
+    if (inp) inp.focus();
+  }
 
-    renderCategory: function(cat, editMode){
-      var self = this;
-      var itemsHtml = cat.items.map(function(item){ return self.renderItem(cat, item, editMode); }).join('');
+  function updExp(id, field, val) {
+    const e = expenses.find(e => e.id === id);
+    if (e) e[field] = val;
+    calc();
+  }
 
-      var addRow = editMode
-        ? (
-            '<div class="add-row">' +
-              '<input type="text" placeholder="Новая позиция…" data-role="add-input" data-cat="' + cat.id + '">' +
-              '<button data-action="add-item" data-cat="' + cat.id + '">Добавить</button>' +
-            '</div>'
-          )
-        : '';
-
-      return (
-        '<div class="category" data-cat="' + cat.id + '">' +
-          '<p class="category-label">' + self.escapeHtml(cat.name) + '</p>' +
-          '<div class="items">' + itemsHtml + '</div>' +
-          addRow +
-        '</div>'
-      );
-    },
-
-    renderMain: function(categories, editMode){
-      var self = this;
-      var categoriesHtml = categories.map(function(cat){ return self.renderCategory(cat, editMode); }).join('');
-
-      var editExtras = editMode
-        ? (
-            '<button class="add-category" data-action="add-category">+ Добавить категорию</button>' +
-            '<button class="restore-defaults" data-action="restore-defaults">Восстановить список по умолчанию</button>'
-          )
-        : '';
-
-      return '<main>' + categoriesHtml + editExtras + '</main>';
-    },
-
-    renderActionbar: function(hasMessage){
-      var disabledAttr = hasMessage ? '' : 'disabled';
-      return (
-        '<div class="actionbar"><div class="actionbar-iner">' +
-          '<button class="btn btn-primary" data-action="open-send-sheet" ' + disabledAttr + '>Отправить список</button>' +
-          '<div class="actionbar-row">' +
-            '<button class="btn btn-secondary" data-action="reset-all">Сбросить</button>' +
-            '<button class="btn btn-secondary" data-action="copy-list" ' + disabledAttr + '>Скопировать</button>' +
-          '</div>' +
-        '</div></div>'
-      );
-    },
-
-    renderApp: function(state){
-      var msg = state.message;
-      return (
-        this.renderHeader(state.counts, state.editMode) +
-        this.renderMain(state.categories, state.editMode) +
-        this.renderActionbar(!!msg)
-      );
-    },
-
-    renderSendSheet: function(message){
-      return (
-        '<div class="overlay" data-role="overlay">' +
-          '<div class="sheet">' +
-            '<h2>Список на закупку</h2>' +
-            '<textarea id="msgArea" readonly>' + this.escapeHtml(message) + '</textarea>' +
-            '<div class="sheet-actions">' +
-              '<button class="btn btn-primary" data-action="send-tg">Отправить в группу</button>' +
-              '<button class="btn btn-secondary" data-action="copy-sheet-text">Скопировать текст</button>' +
-              '<button class="btn btn-secondary" data-action="close-sheet">Закрыть</button>' +
-            '</div>' +
-            '<p class="copied-note" id="statusNote"></p>' +
-          '</div>' +
-        '</div>'
-      );
+  function addExp(name) {
+    name = name || '';
+    if (name) {
+      const existing = expenses.find(e => e.name === name && String(e.sum) === '');
+      if (existing) { focusExpSum(existing.id); return; }
     }
-  };
+    const exp = { id: nextId++, name: name, sum: '' };
+    expenses.push(exp);
+    renderExp();
+    calc();
+    if (name) focusExpSum(exp.id);
+  }
 
-  /* =========================================================
-     CONTROLLER — связывает Store и UI, обрабатывает события
-     через делегирование на document.body (единственный listener).
-     ========================================================= */
-  var App = {
-    editMode: false,
-    appEl: null,
+  function delExp(id) {
+    expenses = expenses.filter(e => e.id !== id);
+    renderExp();
+    calc();
+  }
 
-    init: function(){
-      this.appEl = document.getElementById('app');
-      this.initTelegram();
-      Store.load();
-      this.render();
-      this.initEvents();
-    },
+  /* ==== Расчёты ==== */
+  function calc() {
+    const nal = v('nal'), beznal = v('beznal'), bq = v('beznal_qr'), qr = v('qr');
+    const rash = totalExp();
+    const incass = v('incass');
+    const faktNal = v('fakt_nal');
+    const faktRaw = document.getElementById('fakt_nal').value.trim();
 
-    /* --- сборка текущего состояния для UI.renderApp --- */
-    getViewState: function(){
-      return {
-        categories: Store.data.categories,
-        counts: Store.counts(),
-        message: Store.buildMessage(),
-        editMode: this.editMode
-      };
-    },
+    const itog = nal + beznal + bq + qr;
+    const kassa = faktNal;
+    const nalOzhid = nal - rash - incass;
 
-    render: function(){
-      this.appEl.innerHTML = UI.renderApp(this.getViewState());
-    },
+    document.getElementById('itog-val').textContent = fmt(itog);
+    document.getElementById('m-itog').textContent = fmt(itog);
+    document.getElementById('m-rash').textContent = fmt(rash);
+    document.getElementById('m-kassa').textContent = faktRaw !== '' ? fmt(kassa) : '—';
 
-    /* --- единая точка входа для всех кликов приложения --- */
-    initEvents: function(){
-      document.body.addEventListener('click', this.handleClick.bind(this));
-      document.body.addEventListener('keydown', this.handleKeydown.bind(this));
-    },
+    const itogSub = document.getElementById('itog-sub');
+    const parts = [];
+    if (nal > 0) parts.push('нал ' + fmt(nal));
+    if (beznal > 0) parts.push('безнал ' + fmt(beznal));
+    if (bq > 0) parts.push('QR ' + fmt(bq));
+    if (qr > 0) parts.push('СБП ' + fmt(qr));
+    itogSub.textContent = parts.join(' · ');
 
-    handleKeydown: function(e){
-      if(e.key !== 'Enter' && e.key !== ' ') return;
+    const kassaSub = document.getElementById('kassa-sub');
+    if (faktNal > 0 && nal > 0) {
+      kassaSub.textContent = (rash > 0 || incass > 0)
+        ? 'ожидалось ' + fmt(nalOzhid)
+        : 'нал ' + fmt(nal);
+    } else {
+      kassaSub.textContent = '';
+    }
 
-      var addInput = e.target.closest('[data-role="add-input"]');
-      if(addInput){
-        e.preventDefault();
-        this.addItem(addInput.getAttribute('data-cat'), addInput.value);
-        return;
+    const diff = Math.round((faktNal - nalOzhid) * 100) / 100;
+    const db = document.getElementById('diff-block');
+
+    if (nal > 0 && faktRaw !== '') {
+      if (Math.abs(diff) < 1) {
+        db.innerHTML = '<div class="diff-ok">✓&nbsp; Касса сходится</div>';
+      } else {
+        const sign = diff > 0
+          ? 'Излишек +' + fmt(diff)
+          : 'Недостача ' + fmt(Math.abs(diff));
+        db.innerHTML = '<div class="diff-err">!&nbsp; ' + sign + '</div>';
       }
+    } else {
+      db.innerHTML = '';
+    }
 
-      var itemRow = e.target.closest('.item[data-action="toggle-item"]');
-      if(itemRow){
-        e.preventDefault();
-        this.toggleItem(itemRow.getAttribute('data-cat'), itemRow.getAttribute('data-item'));
-      }
-    },
+    saveDraft();
+  }
 
-    handleClick: function(e){
-      var overlay = e.target.closest('[data-role="overlay"]');
-      if(overlay && e.target === overlay){
-        this.closeSendSheet();
-        return;
-      }
+  function buildReportText() {
+    const nal = v('nal'), beznal = v('beznal'), bq = v('beznal_qr'), qr = v('qr');
+    const incass = v('incass');
+    const faktNal = v('fakt_nal');
+    const itog = nal + beznal + bq + qr;
 
-      var target = e.target.closest('[data-action]');
-      if(!target) return;
+    let text = 'Итог — ' + Math.round(itog).toLocaleString('ru-RU') + '\n\n';
+    text += 'Нал — ' + Math.round(nal).toLocaleString('ru-RU') + '\n';
+    text += 'Безнал — ' + Math.round(beznal).toLocaleString('ru-RU') + '\n';
+    text += 'Безнал QR — ' + Math.round(bq).toLocaleString('ru-RU') + '\n';
+    text += 'QR — ' + Math.round(qr).toLocaleString('ru-RU');
 
-      var action = target.getAttribute('data-action');
-      var catId = target.getAttribute('data-cat');
-      var itemId = target.getAttribute('data-item');
+    const rashLines = expenses
+      .filter(e => parseFloat(e.sum) > 0)
+      .map(e => {
+        const s = Math.round(parseFloat(e.sum)).toLocaleString('ru-RU');
+        return e.name ? e.name + ' — ' + s : s;
+      })
+      .join('\n');
 
-      switch(action){
-        case 'toggle-edit':
-          this.editMode = !this.editMode;
-          this.render();
-          break;
+    if (rashLines) text += '\n\nРасходы\n' + rashLines;
+    if (incass > 0) text += '\n\nИнкассация — ' + Math.round(incass).toLocaleString('ru-RU');
+    text += '\n\nВ кассе ' + Math.round(faktNal).toLocaleString('ru-RU');
+    return text;
+  }
 
-        case 'toggle-item':
-          this.toggleItem(catId, itemId);
-          break;
+  function copyReport() {
+    const text = buildReportText();
 
-        case 'rename-item':
-          e.stopPropagation();
-          this.renameItem(catId, itemId);
-          break;
+    function onCopied() {
+      const btn = document.getElementById('btn-text');
+      btn.textContent = 'Скопировано ✓';
+      setTimeout(() => btn.textContent = 'Скопировать отчёт', 2200);
+    }
 
-        case 'delete-item':
-          e.stopPropagation();
-          Store.deleteItem(catId, itemId);
-          this.render();
-          break;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onCopied).catch(() => fallbackCopy(text, onCopied));
+    } else {
+      fallbackCopy(text, onCopied);
+    }
+  }
 
-        case 'add-item':
-          this.addItem(catId, this.getAddInputValue(catId));
-          break;
+  /* ==== Сохранение в Google Таблицу (бот подключается позже — на стороне скрипта) ==== */
+  async function sendReport() {
+    if (sending) return;
 
-        case 'add-category':
-          this.addCategory();
-          break;
+    if (!APPS_SCRIPT_URL) {
+      alert('Сначала вставьте URL веб-приложения Google в настройку APPS_SCRIPT_URL (строка с пометкой-стрелкой в начале скрипта).');
+      return;
+    }
 
-        case 'restore-defaults':
-          if(confirm('Заменить текущий список списком по умолчанию? Текущие позиции и отметки будут потеряны.')){
-            Store.restoreDefaults();
-            this.render();
-          }
-          break;
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (!tg || !tg.initData) {
+      alert('Сохранение доступно внутри Telegram. В браузере пользуйтесь кнопкой «Скопировать отчёт».');
+      return;
+    }
 
-        case 'reset-all':
-          Store.resetAllStates();
-          this.render();
-          break;
+    sending = true;
+    const btn = document.getElementById('send-btn');
+    const label = document.getElementById('send-btn-text');
+    const original = label.textContent;
+    btn.disabled = true;
+    label.textContent = 'Сохраняем…';
 
-        case 'copy-list':
-          this.copyToClipboard(Store.buildMessage(), target);
-          break;
+    const payload = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      key: APP_KEY,
+      initData: tg.initData,
+      nal: v('nal'),
+      beznal: v('beznal'),
+      beznal_qr: v('beznal_qr'),
+      qr: v('qr'),
+      incass: v('incass'),
+      fakt_nal: v('fakt_nal'),
+      expenses: expenses.map(e => ({ name: e.name, sum: parseFloat(e.sum) || 0 }))
+    };
 
-        case 'open-send-sheet':
-          this.openSendSheet();
-          break;
-
-        case 'close-sheet':
-          this.closeSendSheet();
-          break;
-
-        case 'copy-sheet-text':
-          this.copyToClipboard(Store.buildMessage(), null, document.getElementById('statusNote'));
-          break;
-
-        case 'send-tg':
-          this.sendViaWebApp(target);
-          break;
-      }
-    },
-
-    /* --- операции над позициями --- */
-    toggleItem: function(catId, itemId){
-      if(this.editMode) return;
-      Store.toggleItemState(catId, itemId);
-      this.render();
-    },
-
-    renameItem: function(catId, itemId){
-      var item = Store._findItem(catId, itemId);
-      if(!item) return;
-      var next = prompt('Название позиции:', item.name);
-      if(next && next.trim()){
-        Store.renameItem(catId, itemId, next);
-        this.render();
-      }
-    },
-
-    getAddInputValue: function(catId){
-      var input = document.querySelector('[data-role="add-input"][data-cat="' + catId + '"]');
-      return input ? input.value : '';
-    },
-
-    addItem: function(catId, rawValue){
-      var val = (rawValue || '').trim();
-      if(!val) return;
-      Store.addItem(catId, val);
-      this.render();
-    },
-
-    addCategory: function(){
-      var name = prompt('Название категории:');
-      if(name && name.trim()){
-        Store.addCategory(name);
-        this.render();
-      }
-    },
-
-    /* --- копирование в буфер --- */
-    copyToClipboard: function(message, btnEl, noteEl){
-      if(!message) return;
-      var restoreBtnText = null;
-      if(btnEl){
-        restoreBtnText = btnEl.textContent;
-      }
-
-      function onSuccess(){
-        if(btnEl){
-          btnEl.textContent = 'Скопировано ✓';
-          setTimeout(function(){ btnEl.textContent = restoreBtnText; }, 1800);
-        }
-        if(noteEl){
-          noteEl.classList.remove('send-error');
-          noteEl.textContent = 'Скопировано ✓';
-        }
-      }
-
-      function onFailure(){
-        if(btnEl){
-          btnEl.textContent = 'Не удалось скопировать';
-          setTimeout(function(){ btnEl.textContent = restoreBtnText; }, 1800);
-        }
-        if(noteEl){
-          noteEl.textContent = 'Не удалось скопировать — выделите текст вручную';
-        }
-      }
-
-      navigator.clipboard.writeText(message).then(onSuccess, function(){
-        var area = document.createElement('textarea');
-        area.value = message;
-        area.style.position = 'fixed';
-        area.style.opacity = '0';
-        document.body.appendChild(area);
-        area.focus();
-        area.select();
-        try{
-          document.execCommand('copy');
-          onSuccess();
-        }catch(e2){
-          onFailure();
-        }
-        document.body.removeChild(area);
+    try {
+      // text/plain — чтобы браузер не слал preflight-запрос, который Apps Script не умеет обрабатывать
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
       });
-    },
+      const answer = await res.json();
+      if (!answer.ok) throw new Error(answer.error || 'сервер вернул ошибку');
+      if (answer.warn) alert(answer.warn);
 
-    /* --- модальный лист отправки --- */
-    openSendSheet: function(){
-      var msg = Store.buildMessage();
-      if(!msg) return;
-      var wrapper = document.createElement('div');
-      wrapper.innerHTML = UI.renderSendSheet(msg);
-      document.body.appendChild(wrapper.firstElementChild);
-    },
-
-    closeSendSheet: function(){
-      var overlay = document.querySelector('[data-role="overlay"]');
-      if(overlay) overlay.remove();
-    },
-
-    /* --- отправка данных нативным способом Telegram Mini Apps --- */
-    sendViaWebApp: function(btnEl){
-      var msg = Store.buildMessage();
-      var note = document.getElementById('statusNote');
-      if(!msg){
-        return;
-      }
-
-      if(!window.Telegram || !window.Telegram.WebApp || typeof window.Telegram.WebApp.sendData !== 'function'){
-        if(note){
-          note.classList.add('send-error');
-          note.textContent = 'Отправка доступна только внутри Telegram.';
-        }
-        return;
-      }
-
-      btnEl.disabled = true;
-      btnEl.textContent = 'Отправляем…';
-
-      var payload = JSON.stringify({ messageText: msg });
-
-      Store.resetAllStates();
-      window.Telegram.WebApp.sendData(payload);
-      window.Telegram.WebApp.close();
-    },
-
-    /* --- интеграция с Telegram WebApp (тема, инициализация) --- */
-    applyTelegramTheme: function(tg){
-      document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light');
-    },
-
-    initTelegram: function(){
-      if(!window.Telegram || !window.Telegram.WebApp) return;
-      var tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-      this.applyTelegramTheme(tg);
-      if(tg.onEvent){
-        tg.onEvent('themeChanged', this.applyTelegramTheme.bind(this, tg));
-      }
+      if (tg.HapticFeedback) { try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {} }
+      label.textContent = 'Сохранено ✓';
+      setTimeout(() => label.textContent = original, 2200);
+    } catch (err) {
+      label.textContent = original;
+      alert('Не получилось сохранить: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      sending = false;
     }
-  };
+  }
 
-  App.init();
-})();
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
+    document.body.appendChild(ta);
+
+    if (navigator.userAgent.match(/ipad|iphone/i)) {
+      const range = document.createRange();
+      range.selectNodeContents(ta);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      ta.setSelectionRange(0, 999999);
+    } else {
+      ta.select();
+    }
+
+    try {
+      document.execCommand('copy');
+      cb();
+    } catch (e) {
+      alert('Не удалось скопировать. Попробуйте вручную.');
+    }
+
+    document.body.removeChild(ta);
+  }
+
+  function applyTelegramTheme(tg){
+    document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light');
+  }
+
+  function initTelegram(){
+    if(!window.Telegram || !window.Telegram.WebApp) return;
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    applyTelegramTheme(tg);
+    if(tg.onEvent){
+      tg.onEvent('themeChanged', function(){ applyTelegramTheme(tg); });
+    }
+  }
+
+  initTelegram();
+  loadDraft();
+  renderChips();
+  renderExp();
+  calc();
 </script>
 </body>
 </html>
